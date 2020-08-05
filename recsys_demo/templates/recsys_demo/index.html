@@ -1,0 +1,18 @@
+{% extends 'recsys_demo/_base.html' %}
+{% load static %}
+
+{% block title %}Home page{% endblock title %}
+
+{% block content %}
+<header class="d-flex flex-column flex-md-row align-items-md-center p-5 bg-light">
+  <div class="pt-md-3 pb-md-4" style="margin:0 auto;">
+    <h2 class="bd-title mt-0">Welcome</h2>
+    <p> This is a demo application of recommender systems.</p>
+  </div>
+
+    <div class="row">
+        <img src="{% static 'recsys_demo/img/movies.jpg' %}" class="img-fluid col-xs-4 col-md-3" style="width:60%"  alt="movies"/>
+        <img src="{% static 'recsys_demo/img/manga.jpg' %}" class="img-fluid col-xs-4 col-md-3" style="width:60%"  alt="movies"/>
+    </div>
+</header>
+{% endblock content %}

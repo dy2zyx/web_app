@@ -1,0 +1,132 @@
+import pickle
+import os
+import random
+from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect
+from django.views import generic
+from django.views import View
+from .methods import parse_movie_metadata, movies, init, cbf_recommender
+from .forms import MovieTitleForm
+from collections import defaultdict
+from django.views.generic import CreateView
+from django.contrib import messages
+
+from django.conf import settings
+from .models import UserInfo
+
+# Views
+
+user_inputs_ratings = dict()
+user_inputs = list()
+init()
+parse_movie_metadata()
+movie_titles = [movies[m_id]['title'] for m_id in movies.keys()]
+print(len(movie_titles))
+
+class UserLoginView(CreateView):
+    template_name = 'recsys_demo/login.html'
+    model = UserInfo
+    fields = ('first_name', 'last_name', 'email', 'education')
+
+    def form_valid(self, form):
+        # if self.request.method == 'POST':
+        self.request.session.flush()
+        self.object = form.save(commit=False)
+        # self.object.user = self.request.user
+        self.object.save()
+        return HttpResponseRedirect('index')
+
+
+class IndexView(generic.TemplateView):
+    template_name = 'recsys_demo/index.html'
+
+
+def movierec_view(request):
+    template_name = 'recsys_demo/movie_rec.html'
+    # movies = parse_movie_metadata()
+    # movie_titles = [movies[m_id]['title'] for m_id in movies.keys()]
+
+    if request.is_ajax():
+        input_iid = request.POST.get('data_dict[movie_id]')
+        input_rating = request.POST.get('data_dict[movie_rating]')
+        if not input_iid is None:
+            user_inputs_ratings[input_iid] = input_rating
+            request.session['user_inputs_ratings'] = user_inputs_ratings
+            # print(request.session['user_inputs'])
+            # print(request.session['user_inputs_ratings'])
+            # print(user_inputs_ratings)
+            response = HttpResponse(input_rating, content_type="text/html")
+            return response
+
+    if request.method == 'POST':
+        form = MovieTitleForm(request.POST)
+        if form.is_valid():
+            user_input = form.cleaned_data['movie_title']
+            movie_id = [iid for iid in movies.keys() if ('title', user_input) in movies[iid].items()][0]
+            movie_info = movies[movie_id]
+            user_inputs.append(movie_id)
+            request.session['user_inputs'] = user_inputs
+            context = {'user_input': user_input, 'movie_titles': movie_titles, 'movie_info': movie_info,
+                       'movie_id': movie_id}
+            return render(request, template_name, context=context)
+        else:
+            print(form.errors.as_data())
+            return render(request, template_name, {'form': form, 'movie_titles': movie_titles})
+
+    return render(request, template_name=template_name, context={'movie_titles': movie_titles})
+
+
+def profil_view(request):
+    template_name = 'recsys_demo/profil.html'
+
+    if request.is_ajax() and request.POST['action'] == 'first_call':
+        movie_title = request.POST.get('movie_title')
+        print(movie_title)
+        movie_id = [iid for iid in movies.keys() if ('title', movie_title) in movies[iid].items()][0]
+
+        response = HttpResponse(movie_id, content_type="text/html")
+        return response
+
+    if request.is_ajax() and request.POST['action'] == 'second_call':
+        input_iid = request.POST.get('data_dict[movie_id]')
+        input_rating = request.POST.get('data_dict[movie_rating]')
+        if not input_iid is None:
+            user_inputs_ratings[input_iid] = input_rating
+            request.session['user_inputs_ratings'] = user_inputs_ratings
+            response = HttpResponse(input_rating, content_type="text/html")
+            return response
+
+    if not 'user_inputs_ratings' in request.session.keys():
+        return render(request, template_name=template_name, context={'nb_item': 0})
+    else:
+        data_dict = dict()
+        for iid in request.session['user_inputs_ratings'].keys():
+            if iid in movies.keys():
+                movie_info = movies[iid]
+                movie_rating = request.session['user_inputs_ratings'][iid]
+                l = list()
+                l.append(movie_info)
+                l.append(movie_rating)
+                data_dict[iid] = l
+        print(request.session['user_inputs_ratings'])
+        return render(request, template_name=template_name, context={'data_dict': data_dict, 'nb_item': len(data_dict.keys())})
+
+
+def recommendation_view(request):
+    template_name = 'recsys_demo/recommendation.html'
+
+    if len(request.session['user_inputs_ratings'].keys()) < 5:
+        warning_msg = 'Note that you have to rate at least 5 items before asking for recommendations'
+        messages.warning(request, warning_msg)
+        return HttpResponseRedirect('profil')
+    else:
+        recommender = random.choice(['cbf'])
+        if recommender == 'cbf':
+            recommended_items = cbf_recommender(3, request.session['user_inputs_ratings'])
+            rec_dict = dict()
+            for iid, predicted_r in recommended_items:
+                if iid in movies.keys():
+                    movie_info = movies[iid]
+                    rec_dict[iid] = movie_info
+            print(rec_dict)
+            return render(request, template_name=template_name, context={'rec_dict': rec_dict})

@@ -1,0 +1,172 @@
+{% extends 'recsys_demo/_base.html' %}
+{% load static %}
+
+{% block css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'recsys_demo/css/movie_rec.css' %}">
+
+{% endblock css %}
+{% block title %}Movie recommendations{% endblock title %}
+
+{% block content %}
+<div style="width: 45%; margin:0 auto;">
+    <h6 class="mb-2 text-info">Please select and rate at least 5 movies using the search bar below</h6>
+</div>
+
+
+<!--<div class="row">-->
+<!--    <div class="col-sm-4">-->
+<!--        <div class="wrapper">-->
+<!--            <nav id="sidebar">-->
+<!--        <div class="sidebar-header">-->
+<!--            <p>Search a movie</p>-->
+<!--        </div>-->
+
+<!--        <ul class="list-unstyled components">-->
+<!--            <li class="active">-->
+<!--                <p>Movie title</p>-->
+<!--                <div>-->
+<!--                    <form action="/movie_rec"  method="post">-->
+<!--                    {%  csrf_token  %}-->
+<!--                        <span style="position:relative; display: inline-block;">-->
+<!--                        <div class="input-group mb-3">-->
+<!--                            <input type="search" class="form-control" placeholder="Tape a movie title" name="movie_title">-->
+<!--                                <div class="input-group-append">-->
+<!--                                    <button type="submit" class="btn btn-outline-secondary">-->
+<!--                                        OK-->
+<!--                                    </button>-->
+<!--                                </div>-->
+<!--                        </div>-->
+<!--                        </span>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </li>-->
+<!--            <li class="active">-->
+<!--                <a style="color:#000000; text-decoration: none;" href="#genreSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">-->
+<!--                    Movie genre-->
+<!--                </a>-->
+<!--                <ul class="collapse list-unstyled" id="genreSubmenu">-->
+<!--                    <li>-->
+<!--                        <a style="color:#000000; text-decoration: none;" href="#">Action</a>-->
+<!--                    </li>-->
+<!--                    <li>-->
+<!--                        <a style="color:#000000; text-decoration: none;" href="#">Comedy</a>-->
+<!--                    </li>-->
+<!--                    <li>-->
+<!--                        <a style="color:#000000; text-decoration: none;" href="#">Drame</a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--    </nav>-->
+
+<!--    <div id="content">-->
+<!--        <button type="button" id="sidebarCollapse" class="navbar-btn">-->
+<!--            <span></span>-->
+<!--            <span></span>-->
+<!--            <span></span>-->
+<!--        </button>-->
+<!--    </div>-->
+<!--    </div>-->
+<!--    </div>-->
+<!--    <div class="col-sm-8">-->
+<!--        <div class="d-flex justify-content-center">-->
+<!--            {{  user_input  }}-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+<div>
+    <form action="/movie_rec"  method="post" id="search_form">
+    {%  csrf_token  %}
+<!--        <span style="position:relative; display: inline-block;">-->
+        <div class="input-group mb-3" style="width: 45%; margin:0 auto;">
+            <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Tape a movie title here" autocomplete="off" spellcheck="false">
+                <span class="input-group-btn">
+                    <button id="search_btn" type="submit" class="btn btn-outline-secondary">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </span>
+        </div>
+        </span>
+    </form>
+
+<!--    {% if warning%}-->
+<!--    <div class="alert alert-warning" role="alert" style="width: 45%; margin:0 auto;">-->
+<!--        {{warning}}-->
+<!--    </div>-->
+<!--    {% endif %}-->
+
+    {% if movie_info %}
+    <div class="card mb-3 border-info" style="width: 45%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ movie_info.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  movie_info.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>
+              <p class="card-text">{{  movie_info.overview  }} </p>
+              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
+              <p class="card-text">{{  movie_info.release_date  }} </p>
+              <h6 class="card-subtitle mb-2 text-info">Rating this movie</h6>
+              <form action="/movie_rec" method="post" id="rating_form">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="1" data-max="10" data-step="1" value="9" data-size="md">
+                      <div class="input-group-append">
+                        <button id="submit_rating" type="submit" class="btn btn-secondary">
+                            Submit
+                        </button>
+                      </div>
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+    <form action="/movie_rec/profil" method="post">
+      {% csrf_token %}
+      <div class="input-group-append" style="width: 45%; margin:0 auto;">
+        <button id="finish_rating" type="submit" class="btn btn-success">
+            Finish rating
+        </button>
+      </div>
+    </form>
+</div>
+
+</br>
+{% endblock content %}
+{% block javascript %}
+{{ block.super }}
+
+<script>
+    var movie_id = "{{movie_id}}"
+    $(document).ready(function(){
+        var movie_titles = {{movie_titles|safe}};
+        // Constructing the suggestion engine
+        var movie_titles = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.whitespace,
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            local: movie_titles
+        });
+
+        // Initializing the typeahead
+        $('.typeahead').typeahead({
+            hint: true,
+            highlight: true, /* Enable substring highlighting */
+            minLength: 1 /* Specify minimum characters required for showing result */
+        },
+        {
+            name: 'movie_titles',
+            source: movie_titles
+        });
+    });
+
+</script>
+<script src="{% static 'recsys_demo/js/movie_rec.js' %}"></script>
+
+{% endblock javascript %}

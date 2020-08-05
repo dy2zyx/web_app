@@ -1,0 +1,81 @@
+{% extends 'recsys_demo/_base.html' %}
+{% load static %}
+
+{% block css %}
+{{ block.super }}
+{% endblock css %}
+{% block title %}Preference profile{% endblock title %}
+{% block content %}
+<div style="max-width: 60%; margin:0 auto;">
+    <h4 class="mb-2 text-info" style="text-align: center;">Your have selected and rated the following {{nb_item}} movies: </h4>
+</div>
+<br>
+
+{% if data_dict %}
+<!--<div style="max-width: 45%; margin:0 auto;">-->
+<!--    <div class="row row-cols-3 row-cols-md-2">-->
+<div class="row" style="max-width: 100%; margin: 0 auto;">
+        {% for iid, i_data in data_dict.items %}
+        <div class="col-sm-3">
+            <div class="card mb-3 border-info">
+              <div class="row no-gutters">
+<!--                <div class="col-md-8">-->
+                  <img src="{{ i_data.0.poster_path }}" class="card-img-top">
+<!--                </div>-->
+                <div class="col-md-8">
+                  <div class="card-body">
+                    <h5 id="m_title" class="card-title text-dark">{{  i_data.0.title }}</h5>
+                      <br>
+<!--                      <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>-->
+<!--                      <p class="card-text">{{  i_data.0.overview  }} </p>-->
+                      <h6 class="card-subtitle mb-2 text-info">Release date</h6>
+                      <p class="card-text">{{  i_data.0.release_date  }} </p>
+                      <h6 class="card-subtitle mb-2 text-info">Your rating given to this movie</h6>
+                      <form action="/movie_rec/profil" method="post" id="rating_form">
+                          {% csrf_token %}
+                          <div class="pt-3">
+                              <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="1" data-max="10" data-step="1" value="{{i_data.1}}" data-size="md" disabled>
+<!--                              <div class="input-group-append">-->
+<!--                                <button id="submit_rating" type="submit" class="btn btn-secondary">-->
+<!--                                    Change rating-->
+<!--                                </button>-->
+<!--                              </div>-->
+                          </div>
+                      </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        {% endfor %}
+</div>
+
+<!--    </div>-->
+<!--</div>-->
+{% endif %}
+<div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
+    <form action="/movie_rec">
+        <button type="submit" class="btn btn-secondary" style="max-width: 100%; margin: 0 auto;">Rating more movies</button>
+    </form>
+    <form action="/movie_rec/recommendation">
+        <button type="submit" class="btn btn-success" style="max-width: 100%; margin: 0 auto;">Ask for recommendations</button>
+    </form>
+    {% if messages %}
+        <ul class="messages list-group-flush">
+            {% for message in messages %}
+            <li class="list-group-item list-group-item-warning" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</div>
+</br>
+{% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+
+</script>
+<script src="{% static 'recsys_demo/js/profil.js' %}"></script>
+{% endblock javascript %}
