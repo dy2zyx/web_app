@@ -123,7 +123,7 @@ def recommendation_view(request):
         recommender = random.choice(['cbf', 'svd'])
         print(recommender)
         if recommender == 'cbf':
-            recommended_items = cbf_recommender(3, request.session['user_inputs_ratings'])
+            recommended_items = cbf_recommender(5, request.session['user_inputs_ratings'])
             rec_dict = dict()
             for iid, predicted_r in recommended_items:
                 if iid in movies.keys():
@@ -132,7 +132,7 @@ def recommendation_view(request):
             print(rec_dict)
             return render(request, template_name=template_name, context={'rec_dict': rec_dict})
         if recommender == 'svd':
-            recommended_items = svd_recommender(3, request.session['user_inputs_ratings'])
+            recommended_items = svd_recommender(5, request.session['user_inputs_ratings'])
             rec_dict = dict()
             for iid, predicted_r in recommended_items:
                 if iid in movies.keys():
