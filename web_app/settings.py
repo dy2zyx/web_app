@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third party apps
     'crispy_forms',
+    'django_pandas',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

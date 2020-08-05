@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views import generic
 from django.views import View
-from .methods import parse_movie_metadata, movies, init, cbf_recommender
+from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender
 from .forms import MovieTitleForm
 from collections import defaultdict
 from django.views.generic import CreateView
@@ -21,7 +21,7 @@ user_inputs = list()
 init()
 parse_movie_metadata()
 movie_titles = [movies[m_id]['title'] for m_id in movies.keys()]
-print(len(movie_titles))
+
 
 class UserLoginView(CreateView):
     template_name = 'recsys_demo/login.html'
@@ -120,7 +120,8 @@ def recommendation_view(request):
         messages.warning(request, warning_msg)
         return HttpResponseRedirect('profil')
     else:
-        recommender = random.choice(['cbf'])
+        recommender = random.choice(['cbf', 'svd'])
+        print(recommender)
         if recommender == 'cbf':
             recommended_items = cbf_recommender(3, request.session['user_inputs_ratings'])
             rec_dict = dict()
@@ -129,4 +130,13 @@ def recommendation_view(request):
                     movie_info = movies[iid]
                     rec_dict[iid] = movie_info
             print(rec_dict)
+            return render(request, template_name=template_name, context={'rec_dict': rec_dict})
+        if recommender == 'svd':
+            recommended_items = svd_recommender(3, request.session['user_inputs_ratings'])
+            rec_dict = dict()
+            for iid, predicted_r in recommended_items:
+                if iid in movies.keys():
+                    movie_info = movies[iid]
+                    rec_dict[iid] = movie_info
+            print(recommended_items)
             return render(request, template_name=template_name, context={'rec_dict': rec_dict})
