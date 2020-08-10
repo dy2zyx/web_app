@@ -1,0 +1,38 @@
+{% extends 'recsys_demo/_base.html' %}
+{% load static %}
+
+{% block css %}
+{{ block.super }}
+{% endblock css %}
+{% block title %}Explantions of recommendations{% endblock title %}
+{% block content %}
+<div style="max-width: 60%; margin:0 auto;">
+    <h4 class="mb-2 text-info" style="text-align: center;">Below are recommended movies along with their explanations </h4>
+</div>
+<br>
+
+{% if rec_dict %}
+{% for iid, i_data in rec_dict.items %}
+    <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.0.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.0.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>
+              <p class="card-text">{{  i_data.0.overview  }} </p>
+              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
+              <p class="card-text">{{  i_data.0.release_date  }} </p>
+              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
+              <p class="card-text">{{  i_data.1|safe  }} </p>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+
+{% endif %}
+{% endblock content %}
