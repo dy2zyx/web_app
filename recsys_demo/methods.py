@@ -84,6 +84,8 @@ def parse_movie_metadata():
             movies[id] = movie
 
             line = movie_data.readline()
+        # global nb_movie
+        # nb_movie = len(movies.keys())
     # return movies_by_id
 
 
@@ -107,6 +109,11 @@ def cbf_predict(input_dict, candidate):
 
 
 def cbf_recommender(n, input_dict):
+    """Content-based recommender system
+       parameters:
+                n: number of recommendations to make
+                input_dict: the user profil dictionnary
+    """
     top_n = list()
     rated_items = input_dict.keys()
     candidate_items = [iid for iid in movies.keys() if iid not in rated_items]
@@ -126,6 +133,11 @@ def svd_predict(u_f, candidate):
 
 
 def svd_recommender(n, input_dict):
+    """Matrix factorization model based recommender system
+       parameters:
+                n: number of recommendations to make
+                input_dict: the user profil dictionnary
+    """
     user = '99999'
     list_ratings = list()
     for iid, r in input_dict.items():
@@ -143,6 +155,38 @@ def svd_recommender(n, input_dict):
     candidate_items = [iid for iid in movies.keys() if iid not in rated_items]
     for candidate in candidate_items:
         predicted_r = svd_predict(user_factor, candidate)
+        top_n.append((candidate, predicted_r))
+    top_n = heapq.nlargest(n, top_n, key=lambda x:x[1])
+    return top_n
+
+
+def hybride_recommender(n, input_dict):
+    """Hybrid recommendation system which combines CBF and SVD
+        parameters:
+            n: number of recommendations to make
+            input_dict: user input for building user profile
+    """
+
+    user = '99999'
+    list_ratings = list()
+    for iid, r in input_dict.items():
+        list_ratings.append((user, iid, r))
+    df = pd.DataFrame(list_ratings, columns =['userID', 'itemID', 'rating'])
+    reader = Reader(rating_scale=(0, 10))
+    data = Dataset.load_from_df(df=df, reader=reader)
+    train = data.build_full_trainset()
+    svd = SVD()
+    svd.fit(train)
+    user_factor = svd.pu[svd.trainset.to_inner_uid(user)]
+
+    top_n = list()
+    rated_items = input_dict.keys()
+    candidate_items = [iid for iid in movies.keys() if iid not in rated_items]
+
+    for candidate in candidate_items:
+        predicted_r_svd = svd_predict(user_factor, candidate)
+        predicted_r_cbf = cbf_predict(input_dict, candidate)
+        predicted_r = (predicted_r_cbf + predicted_r_svd) / 2
         top_n.append((candidate, predicted_r))
     top_n = heapq.nlargest(n, top_n, key=lambda x:x[1])
     return top_n

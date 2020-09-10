@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views import generic
 from django.views import View
-from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, basic_exp_generator, broader_exp_generator
+from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, hybride_recommender, basic_exp_generator, broader_exp_generator
 from .forms import MovieTitleForm
 from collections import defaultdict
 from django.views.generic import CreateView
@@ -115,12 +115,12 @@ def profil_view(request):
 def recommendation_view(request):
     template_name = 'recsys_demo/recommendation.html'
 
-    if len(request.session['user_inputs_ratings'].keys()) < 3:
+    if 'user_inputs_ratings' not in request.session.keys() or len(request.session['user_inputs_ratings'].keys()) < 3:
         warning_msg = 'Note that you have to rate at least 3 items before asking for recommendations'
         messages.warning(request, warning_msg)
         return HttpResponseRedirect('profil')
     else:
-        recommender = random.choice(['cbf', 'svd'])
+        recommender = random.choice(['cbf', 'svd', 'hybride'])
         print(recommender)
         if recommender == 'cbf':
             recommended_items = cbf_recommender(5, request.session['user_inputs_ratings'])
@@ -142,6 +142,16 @@ def recommendation_view(request):
                     rec_dict[iid] = movie_info
             # print(recommended_items)
             return render(request, template_name=template_name, context={'rec_dict': rec_dict})
+        if recommender == 'hybride':
+            recommended_items = hybride_recommender(5, request.session['user_inputs_ratings'])
+            request.session['recommended_items'] = recommended_items
+            rec_dict = dict()
+            for iid, predicted_r in recommended_items:
+                if iid in movies.keys():
+                    movie_info = movies[iid]
+                    rec_dict[iid] = movie_info
+            # print(recommended_items)
+            return render(request, template_name=template_name, context={'rec_dict': rec_dict})
 
 
 def explanation_view(request):
@@ -153,7 +163,7 @@ def explanation_view(request):
         input_dict = request.session['user_inputs_ratings']
         recommended_items = request.session['recommended_items']
 
-        exp_output_dict = basic_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=5)
+        exp_output_dict = basic_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3)
         # print(exp_output_dict)
         rec_dict = dict()
         for iid, predicted_r in recommended_items:
@@ -170,7 +180,7 @@ def explanation_view(request):
         input_dict = request.session['user_inputs_ratings']
         recommended_items = request.session['recommended_items']
 
-        exp_output_dict = broader_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=4)
+        exp_output_dict = broader_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3)
         # print(exp_output_dict)
         rec_dict = dict()
         for iid, predicted_r in recommended_items:
