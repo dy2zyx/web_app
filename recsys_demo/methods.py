@@ -456,7 +456,7 @@ def generate_exp_from_pattern(pattern_dict):
                 m_titles_exp = ""
                 for m in value:
                     m_titles_exp += "<b>" + movies[uri_iid_dict[m]]['title'] + "</b>" + ", "
-            explanation += " you " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + ppt + " is " + "<i>" + key + "</i>" + " as " + m_titles_exp + ". "
+            explanation += " You " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + ppt + " is " + "<i>" + key + "</i>" + " as " + m_titles_exp + ". "
         return explanation
     else:
         count = 1
@@ -476,7 +476,7 @@ def generate_exp_from_pattern(pattern_dict):
                     m_titles_exp = ""
                     for m in value:
                         m_titles_exp += "<b>" + movies[uri_iid_dict[m]]['title'] + "</b>" + ", "
-                explanation += " you " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + ppt + " is "+ "<i>" + key + "</i>" + " as " + m_titles_exp + ". "
+                explanation += " You " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + ppt + " is "+ "<i>" + key + "</i>" + " as " + m_titles_exp + ". "
             count += 1
         return explanation
 

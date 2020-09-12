@@ -22,17 +22,82 @@
           <div class="card-body">
             <h5 class="card-title text-dark">{{  i_data.0.title }}</h5>
               <br>
-              <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>
-              <p class="card-text">{{  i_data.0.overview  }} </p>
+<!--              <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>-->
+<!--              <p class="card-text">{{  i_data.0.overview  }} </p>-->
               <h6 class="card-subtitle mb-2 text-info">Release date</h6>
               <p class="card-text">{{  i_data.0.release_date  }} </p>
               <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
               <p class="card-text">{{  i_data.1|safe  }} </p>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation (Please read the explanation first!)</h6>
+              <form method="post" id="rating_form_Q1">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_{{iid}}" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
           </div>
         </div>
       </div>
     </div>
 {% endfor %}
-
 {% endif %}
+
+<div style="max-width: 60%; margin:0 auto;">
+    <h4 class="mb-2 text-info" style="text-align: center;">Please fill the questionnaire below</h4>
+</div>
+
+<div class="card mb-3 border-dark" style="width: 60%; margin:0 auto;">
+  <div class="row no-gutters">
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title text-dark">Questionnaire</h5>
+          <br>
+          <h6 class="card-subtitle mb-2 text-dark">I understood why this group of movies was recommended to me</h6>
+          <form method="post" id="rating_form_Q2">
+              {% csrf_token %}
+              <div class="pt-3">
+                  <input id="user_rating_Q2" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+              </div>
+          </form>
+          <hr/>
+          <h6 class="card-subtitle mb-2 text-dark">The explanation made all the recommendations more convincing</h6>
+          <form method="post" id="rating_form_Q3">
+              {% csrf_token %}
+              <div class="pt-3">
+                  <input id="user_rating_Q3" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+              </div>
+          </form>
+          <hr/>
+          <h6 class="card-subtitle mb-2 text-dark">The explanation helped me discover new information about all these movies</h6>
+          <form method="post" id="rating_form_Q4">
+              {% csrf_token %}
+              <div class="pt-3">
+                  <input id="user_rating_Q4" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+              </div>
+          </form>
+          <hr/>
+          <h6 class="card-subtitle mb-2 text-dark">The explanation increased my trust in the recommender system</h6>
+          <form method="post" id="rating_form_Q5">
+              {% csrf_token %}
+              <div class="pt-3">
+                  <input id="user_rating_Q5" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+              </div>
+          </form>
+          <hr/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
+    <form action="/movie_rec/recommendation/re_eval">
+        <button type="submit" id="feedback_exp1" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Submit </button>
+    </form>
+</div>
 {% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script src="{% static 'recsys_demo/js/movie_exp.js' %}"></script>
+{% endblock javascript %}

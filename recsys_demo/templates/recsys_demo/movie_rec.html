@@ -13,74 +13,12 @@
     <h6 class="mb-2 text-info">Please select and rate at least 3 movies using the search bar below</h6>
 </div>
 
-
-<!--<div class="row">-->
-<!--    <div class="col-sm-4">-->
-<!--        <div class="wrapper">-->
-<!--            <nav id="sidebar">-->
-<!--        <div class="sidebar-header">-->
-<!--            <p>Search a movie</p>-->
-<!--        </div>-->
-
-<!--        <ul class="list-unstyled components">-->
-<!--            <li class="active">-->
-<!--                <p>Movie title</p>-->
-<!--                <div>-->
-<!--                    <form action="/movie_rec"  method="post">-->
-<!--                    {%  csrf_token  %}-->
-<!--                        <span style="position:relative; display: inline-block;">-->
-<!--                        <div class="input-group mb-3">-->
-<!--                            <input type="search" class="form-control" placeholder="Tape a movie title" name="movie_title">-->
-<!--                                <div class="input-group-append">-->
-<!--                                    <button type="submit" class="btn btn-outline-secondary">-->
-<!--                                        OK-->
-<!--                                    </button>-->
-<!--                                </div>-->
-<!--                        </div>-->
-<!--                        </span>-->
-<!--                    </form>-->
-<!--                </div>-->
-<!--            </li>-->
-<!--            <li class="active">-->
-<!--                <a style="color:#000000; text-decoration: none;" href="#genreSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">-->
-<!--                    Movie genre-->
-<!--                </a>-->
-<!--                <ul class="collapse list-unstyled" id="genreSubmenu">-->
-<!--                    <li>-->
-<!--                        <a style="color:#000000; text-decoration: none;" href="#">Action</a>-->
-<!--                    </li>-->
-<!--                    <li>-->
-<!--                        <a style="color:#000000; text-decoration: none;" href="#">Comedy</a>-->
-<!--                    </li>-->
-<!--                    <li>-->
-<!--                        <a style="color:#000000; text-decoration: none;" href="#">Drame</a>-->
-<!--                    </li>-->
-<!--                </ul>-->
-<!--            </li>-->
-<!--        </ul>-->
-<!--    </nav>-->
-
-<!--    <div id="content">-->
-<!--        <button type="button" id="sidebarCollapse" class="navbar-btn">-->
-<!--            <span></span>-->
-<!--            <span></span>-->
-<!--            <span></span>-->
-<!--        </button>-->
-<!--    </div>-->
-<!--    </div>-->
-<!--    </div>-->
-<!--    <div class="col-sm-8">-->
-<!--        <div class="d-flex justify-content-center">-->
-<!--            {{  user_input  }}-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
 <div>
     <form action="/movie_rec"  method="post" id="search_form">
     {%  csrf_token  %}
 <!--        <span style="position:relative; display: inline-block;">-->
         <div class="input-group mb-3" style="width: 45%; margin:0 auto;">
-            <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Tape a movie title here" autocomplete="off" spellcheck="false">
+            <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Enter a movie title" autocomplete="off" spellcheck="false">
                 <span class="input-group-btn">
                     <button id="search_btn" type="submit" class="btn btn-outline-secondary">
                         <i class="fa fa-search"></i>
@@ -110,14 +48,14 @@
               <p class="card-text">{{  movie_info.overview  }} </p>
               <h6 class="card-subtitle mb-2 text-info">Release date</h6>
               <p class="card-text">{{  movie_info.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Rating this movie</h6>
+              <h6 class="card-subtitle mb-2 text-info">Rate this movie</h6>
               <form action="/movie_rec" method="post" id="rating_form">
                   {% csrf_token %}
                   <div class="pt-3">
                       <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="1" data-max="10" data-step="1" value="9" data-size="md">
                       <div class="input-group-append">
                         <button id="submit_rating" type="submit" class="btn btn-secondary">
-                            Submit
+                            <i class="fa fa-check fa-lg"></i> Submit
                         </button>
                       </div>
                   </div>
@@ -132,7 +70,7 @@
       {% csrf_token %}
       <div class="input-group-append" style="width: 45%; margin:0 auto;">
         <button id="finish_rating" type="submit" class="btn btn-success">
-            Finish rating
+            <i class="fa fa-check fa-lg"></i> Finish rating
         </button>
       </div>
     </form>

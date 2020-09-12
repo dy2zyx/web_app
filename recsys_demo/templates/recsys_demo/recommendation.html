@@ -42,7 +42,7 @@
 <!--</div>-->
 
 {% for iid, i_data in rec_dict.items %}
-    <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
+    <div class="card mb-3 border-info" style="width: 35%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <img src="{{ i_data.poster_path }}" class="card-img">
@@ -51,8 +51,8 @@
           <div class="card-body">
             <h5 class="card-title text-dark">{{  i_data.title }}</h5>
               <br>
-              <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>
-              <p class="card-text">{{  i_data.overview  }} </p>
+<!--              <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>-->
+<!--              <p class="card-text">{{  i_data.overview  }} </p>-->
               <h6 class="card-subtitle mb-2 text-info">Release date</h6>
               <p class="card-text">{{  i_data.release_date  }} </p>
           </div>
@@ -65,7 +65,7 @@
 
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
     <form action="/movie_rec/recommendation/explanation">
-        <button type="submit" onclick = "toggle('loading_exp')" id="ask_exp" class="btn btn-success" style="max-width: 100%; margin: 0 auto;">Ask explanations for my recommendations</button>
+        <button type="submit" onclick = "toggle('loading_exp')" id="ask_exp" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Ask for explanations of recommendations</button>
     </form>
     <div class="d-flex flex-column align-items-center justify-content-center" id="loading_exp" style="visibility:hidden;">
        <div class="row">

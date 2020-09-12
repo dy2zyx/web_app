@@ -1,0 +1,54 @@
+{% extends 'recsys_demo/_base.html' %}
+{% load static %}
+
+{% block css %}
+{{ block.super }}
+{% endblock css %}
+{% block title %}Recommendation details and re-rate{% endblock title %}
+{% block content %}
+<div style="max-width: 60%; margin:0 auto;">
+    <h4 class="mb-2 text-info" style="text-align: center;">In this section, you will be asked to: </h4>
+    <h5 class="mb-2 text-dark" style="text-align: center;">1. Click the link of each recommended movie, which will provide you with more information about the movie, such as the genre, the actors, the director etc. </h5>
+    <h5 class="mb-2 text-dark" style="text-align: center;">2. Rate again the recommended movie and submit your feedback </h5>
+</div>
+<br>
+
+{% if recomm_dict %}
+{% for iid, i_data in recomm_dict.items %}
+    <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again (Please check the movie details first!)</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+{% endif %}
+
+<div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
+    <form action="/thanks">
+        <button type="submit" id="feedback_exp2" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Submit </button>
+    </form>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script src="{% static 'recsys_demo/js/movie_re_eval.js' %}"></script>
+{% endblock javascript %}

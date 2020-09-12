@@ -41,6 +41,10 @@ class IndexView(generic.TemplateView):
     template_name = 'recsys_demo/index.html'
 
 
+class ThanksView(generic.TemplateView):
+    template_name = 'recsys_demo/thanks.html'
+
+
 def movierec_view(request):
     template_name = 'recsys_demo/movie_rec.html'
     # movies = parse_movie_metadata()
@@ -123,7 +127,7 @@ def recommendation_view(request):
         recommender = random.choice(['cbf', 'svd', 'hybride'])
         print(recommender)
         if recommender == 'cbf':
-            recommended_items = cbf_recommender(5, request.session['user_inputs_ratings'])
+            recommended_items = cbf_recommender(2, request.session['user_inputs_ratings'])
             request.session['recommended_items'] = recommended_items
             rec_dict = dict()
             for iid, predicted_r in recommended_items:
@@ -133,7 +137,7 @@ def recommendation_view(request):
             # print(rec_dict)
             return render(request, template_name=template_name, context={'rec_dict': rec_dict})
         if recommender == 'svd':
-            recommended_items = svd_recommender(5, request.session['user_inputs_ratings'])
+            recommended_items = svd_recommender(2, request.session['user_inputs_ratings'])
             request.session['recommended_items'] = recommended_items
             rec_dict = dict()
             for iid, predicted_r in recommended_items:
@@ -143,7 +147,7 @@ def recommendation_view(request):
             # print(recommended_items)
             return render(request, template_name=template_name, context={'rec_dict': rec_dict})
         if recommender == 'hybride':
-            recommended_items = hybride_recommender(5, request.session['user_inputs_ratings'])
+            recommended_items = hybride_recommender(2, request.session['user_inputs_ratings'])
             request.session['recommended_items'] = recommended_items
             rec_dict = dict()
             for iid, predicted_r in recommended_items:
@@ -156,6 +160,15 @@ def recommendation_view(request):
 
 def explanation_view(request):
     template_name = 'recsys_demo/explanation.html'
+    if request.is_ajax():
+        user_info = UserInfo.objects.get()
+        feedback_dict = request.POST.get('feedback')
+        print(feedback_dict)
+        user_info.feed_back_1 = str(feedback_dict)
+        user_info.save()
+        message = 'update successful'
+        response = HttpResponse(message, content_type="text/html")
+        return response
 
     explanation_style = random.choice(['basic', 'broader'])
     print(explanation_style)
@@ -193,3 +206,26 @@ def explanation_view(request):
                     explanation = "Hops, it seems that it is failed to generate explanation for this item"
                     rec_dict[iid] = (movie_info, explanation)
         return render(request, template_name=template_name, context={'rec_dict': rec_dict})
+
+
+def re_eval_view(request):
+    template_name = 'recsys_demo/re_eval.html'
+
+    if request.is_ajax():
+        user_info = UserInfo.objects.get()
+        feedback_dict = request.POST.get('feedback_2')
+        user_info.feed_back_2 = str(feedback_dict)
+        user_info.save()
+        message = 'update successful'
+        response = HttpResponse(message, content_type="text/html")
+        return response
+
+    rec_dict = dict()
+    recommended_items = request.session['recommended_items']
+    # print(recommended_items)
+    for iid, predicted_r in recommended_items:
+        if iid in movies.keys():
+            movie_info = movies[iid]
+            rec_dict[iid] = movie_info
+            # print(recommended_items)
+    return render(request, template_name=template_name, context={'recomm_dict': rec_dict})
