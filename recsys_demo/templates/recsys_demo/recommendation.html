@@ -12,35 +12,6 @@
 <br>
 
 {% if rec_dict %}
-
-<!--<div class="row" style="max-width: 100%; margin: 0 auto;">-->
-<!--        {% for iid, i_data in rec_dict.items %}-->
-<!--        <div class="col-sm-3">-->
-<!--            <div class="card mb-3 border-info">-->
-<!--              <div class="row no-gutters">-->
-<!--                  <img src="{{ i_data.poster_path }}" class="card-img-top">-->
-<!--                <div class="col-md-8">-->
-<!--                  <div class="card-body">-->
-<!--                    <h5 id="m_title" class="card-title text-dark">{{  i_data.title }}</h5>-->
-<!--                      <br>-->
-<!--                      <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>-->
-<!--                      <p class="card-text">{{  i_data.overview  }} </p>-->
-<!--                      <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
-<!--                      <p class="card-text">{{  i_data.release_date  }} </p>-->
-<!--&lt;!&ndash;                      <form action="/movie_rec/profil" method="post" id="rating_form">&ndash;&gt;-->
-<!--&lt;!&ndash;                          {% csrf_token %}&ndash;&gt;-->
-<!--&lt;!&ndash;                          <div class="pt-3">&ndash;&gt;-->
-<!--&lt;!&ndash;                              <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="1" data-max="10" data-step="1" value="{{i_data.1}}" data-size="md" disabled>&ndash;&gt;-->
-<!--&lt;!&ndash;                          </div>&ndash;&gt;-->
-<!--&lt;!&ndash;                      </form>&ndash;&gt;-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        {% endfor %}-->
-<!--</div>-->
-
 {% for iid, i_data in rec_dict.items %}
     <div class="card mb-3 border-info" style="width: 35%; margin:0 auto;">
       <div class="row no-gutters">
@@ -60,7 +31,6 @@
       </div>
     </div>
 {% endfor %}
-
 {% endif %}
 
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">

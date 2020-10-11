@@ -28,7 +28,7 @@ $(document).ready(function () {
                      //this gets called when server returns an OK response
                     },
                 error: function (data) {
-                     alert("it didnt work");
+//                     alert("it didnt work");
                     }
                 });
             },

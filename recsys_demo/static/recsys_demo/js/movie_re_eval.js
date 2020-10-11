@@ -19,7 +19,7 @@ $(document).ready(function () {
         //            alert(data)
                 },
             error: function (data) {
-                 alert("it didnt work");
+//                 alert("it didnt work");
 //                 console.log(data)
                 }
         });

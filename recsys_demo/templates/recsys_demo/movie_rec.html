@@ -10,7 +10,7 @@
 
 {% block content %}
 <div style="width: 45%; margin:0 auto;">
-    <h6 class="mb-2 text-info">Please select and rate at least 3 movies using the search bar below</h6>
+    <h6 class="mb-2 text-info">Note: Please rate at least 3 movies you like. You can either rate movies from a randomly generated movie list or find a particular movie by title using the search bar</h6>
 </div>
 
 <div>
@@ -35,6 +35,9 @@
 <!--    {% endif %}-->
 
     {% if movie_info %}
+    <div style="width: 45%; margin:0 auto;">
+        <h4 class="mb-2 text-info">User searched movie</h4>
+    </div>
     <div class="card mb-3 border-info" style="width: 45%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
@@ -66,6 +69,44 @@
     </div>
 
     {% endif %}
+    {% if random_movies_dict %}
+    <div style="width: 45%; margin:0 auto;">
+        <h4 class="mb-2 text-info">Randomly displayed movies</h4>
+    </div>
+    {% for iid, i_data in random_movies_dict.items %}
+        <div class="card mb-3 border-info" style="width: 45%; margin:0 auto;">
+          <div class="row no-gutters">
+            <div class="col-md-4">
+              <img src="{{ i_data.0.poster_path }}" class="card-img">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title text-dark">{{  i_data.0.title }}</h5>
+                  <br>
+                  <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>
+                  <p class="card-text">{{  i_data.0.overview  }} </p>
+                  <h6 class="card-subtitle mb-2 text-info">Release date</h6>
+                  <p class="card-text">{{  i_data.0.release_date  }} </p>
+                  <hr/>
+                  <h6 class="card-subtitle mb-2 text-info">Rate this movie</h6>
+                  <form action="/movie_rec" method="post" id="rating_form_{{i_data.1}}">
+                      {% csrf_token %}
+                      <div class="pt-3">
+                          <input id="user_rating_{{i_data.1}}" name="movie_rating" class="rating rating-loading" data-min="1" data-max="10" data-step="1" value="9" data-size="md">
+                          <div class="input-group-append">
+                            <button id="submit_rating_{{i_data.1}}" type="submit" class="btn btn-secondary">
+                                <i class="fa fa-check fa-lg"></i> Submit
+                            </button>
+                          </div>
+                      </div>
+                  </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+    {% endif %}
+
     <form action="/movie_rec/profil" method="post">
       {% csrf_token %}
       <div class="input-group-append" style="width: 45%; margin:0 auto;">
@@ -83,6 +124,7 @@
 
 <script>
     var movie_id = "{{movie_id}}"
+    var random_movie_id_dict = {{random_movie_id_dict|safe}}
     $(document).ready(function(){
         var movie_titles = {{movie_titles|safe}};
         // Constructing the suggestion engine

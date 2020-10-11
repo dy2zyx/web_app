@@ -216,20 +216,23 @@ def generate_queries(input_dict, recommended_items):
          ?i_prof ?p ?o .
          ?i_rec ?p ?o .
          """ + filter_profil + "\n" + filter_rec + """
-         filter regex(str(?o), \"http://dbpedia.org/resource\")
+         filter regex(str(?o), \"http://dbpedia.org/resource\") filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
         }
         """
 
     query_broader_builder = """
         PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX dct: <http://purl.org/dc/terms/>
         select distinct ?o3 ?o1 ?o2
         where {
          ?i_prof ?p ?o1 .
          ?i_rec ?p ?o2 .
-         ?o1 skos:broader ?o3 .
-         ?o2 skos:broader ?o3 .
+         ?o1 ?p1 ?o3 .
+         ?o2 ?p1 ?o3 .
          """ + filter_profil + "\n" + filter_rec + """
-         filter regex(str(?o3), \"http://dbpedia.org/resource\")
+         filter regex(str(?o3), \"http://dbpedia.org/resource\") 
+         filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
+         filter (?p1 = dct:subject || ?p1 = skos:broader)
         }
         """
 
@@ -312,16 +315,20 @@ def rank_p_broader(candidate_properties_broader, basic_p_scores, input_dict, rec
         query1 = """
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             PREFIX dbo: <http://dbpedia.org/ontology/>
+            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+            PREFIX dct: <http://purl.org/dc/terms/>
+            
             select (count(distinct ?movie) as ?nb_movie)
             where {
                 ?movie rdf:type dbo:Film .
-                ?movie ?p <""" + b + """> .
+                ?movie ?p ?po .
+                ?po ?p1 <""" + b + """> .
+                filter (?p1 = dct:subject || ?p1 = skos:broader)
             }
         """
 #         sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
         sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
         sparql.setQuery(query1)
-        results = sparql.query()
         for result in sparql.query().bindings:
             b_freq = int(result["nb_movie"].value)
 
@@ -355,7 +362,6 @@ def basic_patterns(top_k_properties, filter_profil, filter_rec):
 #     print(query)
     sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
     sparql.setQuery(query)
-    results = sparql.query()
     for result in sparql.query().bindings:
         i_prof = result["i_prof"].value
         p = result["p"].value
@@ -396,22 +402,24 @@ def broader_patterns(top_k_properties, filter_profil, filter_rec):
 
     query = """
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        PREFIX dct: <http://purl.org/dc/terms/>
         select distinct ?i_prof ?p ?label_o ?i_rec
         where {
             ?i_prof ?p ?o1 .
             ?i_rec ?p ?o2 .
-            ?o1 skos:broader ?o3 .
-            ?o2 skos:broader ?o3 .
+            ?o1 ?p1 ?o3 .
+            ?o2 ?p1 ?o3 .
             """ + "\n" + filter_profil + "\n" + filter_rec + "\n" + filter_top_k_p + """\n
             ?o3 rdfs:label ?label_o .
             filter (lang(?label_o) = 'en')
             filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
+            filter (?p1 = dct:subject || ?p1 = skos:broader)
             }
     """
 #     print(query)
     sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
     sparql.setQuery(query)
-    results = sparql.query()
     for result in sparql.query().bindings:
         i_prof = result["i_prof"].value
         p = result["p"].value

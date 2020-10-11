@@ -21,6 +21,16 @@ user_inputs = list()
 init()
 parse_movie_metadata()
 movie_titles = [movies[m_id]['title'] for m_id in movies.keys()]
+random_movie_ids = random.sample(movies.keys(), k=10)
+random_movies_dict = dict()
+random_movie_id_dict = dict()
+compteur = 0
+for m_id in random_movie_ids:
+    random_movies_dict[m_id] = (movies[m_id], compteur)
+    random_movie_id_dict[compteur] = m_id
+    compteur += 1
+
+
 
 
 class UserLoginView(CreateView):
@@ -71,13 +81,12 @@ def movierec_view(request):
             user_inputs.append(movie_id)
             request.session['user_inputs'] = user_inputs
             context = {'user_input': user_input, 'movie_titles': movie_titles, 'movie_info': movie_info,
-                       'movie_id': movie_id}
+                       'movie_id': movie_id, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict}
             return render(request, template_name, context=context)
         else:
             print(form.errors.as_data())
-            return render(request, template_name, {'form': form, 'movie_titles': movie_titles})
-
-    return render(request, template_name=template_name, context={'movie_titles': movie_titles})
+            return render(request, template_name, {'form': form, 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
+    return render(request, template_name=template_name, context={'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
 
 
 def profil_view(request):
