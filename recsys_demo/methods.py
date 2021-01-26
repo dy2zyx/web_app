@@ -12,6 +12,7 @@ from scipy.spatial.distance import cosine
 from surprise import SVD, Reader, Dataset
 from SPARQLWrapper import SPARQLWrapper2
 from collections import defaultdict
+from recsys_demo.explainer import ExpKGE
 
 movies = dict()
 iid_uri_dict = dict()
@@ -58,7 +59,8 @@ def init():
         }
     """
 #     sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-    sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
+    sparql = SPARQLWrapper2("https://dbpedia.org/sparql")
+
     sparql.setQuery(query)
     for result in sparql.query().bindings:
         nb_movie = int(result["nb_movie"].value)
@@ -101,7 +103,7 @@ def cbf_predict(input_dict, candidate):
     rating = 0
     for item in input_dict.keys():
         sim_item_candidate = compute_sim(candidate, item)
-        if int(input_dict[item]) > 6:
+        if int(input_dict[item]) > 3:
             rating += sim_item_candidate
         else:
             rating -= sim_item_candidate
@@ -114,6 +116,7 @@ def cbf_recommender(n, input_dict):
                 n: number of recommendations to make
                 input_dict: the user profil dictionnary
     """
+
     top_n = list()
     rated_items = input_dict.keys()
     candidate_items = [iid for iid in movies.keys() if iid not in rated_items]
@@ -141,7 +144,8 @@ def svd_recommender(n, input_dict):
     user = '99999'
     list_ratings = list()
     for iid, r in input_dict.items():
-        list_ratings.append((user, iid, r))
+        list_ratings.append((user, iid, str(int(r)*2)))
+    print(list_ratings)
     df = pd.DataFrame(list_ratings, columns =['userID', 'itemID', 'rating'])
     reader = Reader(rating_scale=(0, 10))
     data = Dataset.load_from_df(df=df, reader=reader)
@@ -170,7 +174,8 @@ def hybride_recommender(n, input_dict):
     user = '99999'
     list_ratings = list()
     for iid, r in input_dict.items():
-        list_ratings.append((user, iid, r))
+        list_ratings.append((user, iid, str(int(r)*2)))
+    print(list_ratings)
     df = pd.DataFrame(list_ratings, columns =['userID', 'itemID', 'rating'])
     reader = Reader(rating_scale=(0, 10))
     data = Dataset.load_from_df(df=df, reader=reader)
@@ -251,6 +256,7 @@ def basic_builder(query):
 
 
 def broader_builder(query):
+    print(query)
     candidate_properties = defaultdict(set)
 #     sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
     sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
@@ -489,6 +495,22 @@ def generate_exp_from_pattern(pattern_dict):
         return explanation
 
 
+def generate_exp_from_pattern_cem(pattern_dict):
+    explanation = ""
+    explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since'])
+
+    for key, value in pattern_dict.items():
+        percentage = round(value * 100, 2)
+        if percentage > 0.00:
+            m_title = " <b>" + movies[key]['title'] + "</b> " + ", "
+            explanation += " <b>" + str(percentage) + "%" + "</b> " + "of users interested by " + m_title
+    explanation += " would also likely to like this movie."
+    if "of users interested by" in explanation:
+        return explanation
+    else:
+        return "not possible"
+
+
 def basic_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3):
     # generate queries
     filter_profil, filter_rec, query_basic_builder, query_broader_builder = generate_queries(input_dict, recommended_items)
@@ -530,4 +552,21 @@ def broader_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=
         pattern = patterns_dict[rec_item]
         explantion = generate_exp_from_pattern(pattern)
         exp_output_dict[uri_iid_dict[rec_item]] = explantion
+    return exp_output_dict
+
+
+def pem_cem_exp_generator(input_dict, recommended_items):
+    exp_kge = ExpKGE(recommended_items=recommended_items, input_dict=input_dict)
+    pattern_dict, patterns_dict_cem = exp_kge.exp_generator()
+    exp_output_dict = dict()
+
+    for rec_item in pattern_dict.keys():
+        pattern = pattern_dict[rec_item]
+        explantion = generate_exp_from_pattern(pattern)
+        exp_output_dict[uri_iid_dict[rec_item]] = explantion
+    for rec_item in patterns_dict_cem.keys():
+        pattern = patterns_dict_cem[rec_item]
+        explantion = generate_exp_from_pattern_cem(pattern)
+        if not explantion == "not possible":
+            exp_output_dict[rec_item] = explantion
     return exp_output_dict

@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views import generic
 from django.views import View
-from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, hybride_recommender, basic_exp_generator, broader_exp_generator
+from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, hybride_recommender, basic_exp_generator, broader_exp_generator, pem_cem_exp_generator
 from .forms import MovieTitleForm
 from collections import defaultdict
 from django.views.generic import CreateView
@@ -29,8 +29,6 @@ for m_id in random_movie_ids:
     random_movies_dict[m_id] = (movies[m_id], compteur)
     random_movie_id_dict[compteur] = m_id
     compteur += 1
-
-
 
 
 class UserLoginView(CreateView):
@@ -117,6 +115,7 @@ def profil_view(request):
             if iid in movies.keys():
                 movie_info = movies[iid]
                 movie_rating = request.session['user_inputs_ratings'][iid]
+                # movie_rating = str(int(movie_rating) * 2)
                 l = list()
                 l.append(movie_info)
                 l.append(movie_rating)
@@ -179,7 +178,7 @@ def explanation_view(request):
         response = HttpResponse(message, content_type="text/html")
         return response
 
-    explanation_style = random.choice(['basic', 'broader'])
+    explanation_style = random.choice(['basic', 'broader', 'pem_cem'])
     print(explanation_style)
     if explanation_style == 'basic':
         input_dict = request.session['user_inputs_ratings']
@@ -203,6 +202,23 @@ def explanation_view(request):
         recommended_items = request.session['recommended_items']
 
         exp_output_dict = broader_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3)
+        # print(exp_output_dict)
+        rec_dict = dict()
+        for iid, predicted_r in recommended_items:
+            if iid in movies.keys():
+                movie_info = movies[iid]
+                if iid in exp_output_dict.keys():
+                    explanation = exp_output_dict[iid]
+                    rec_dict[iid] = (movie_info, explanation)
+                else:
+                    explanation = "Hops, it seems that it is failed to generate explanation for this item"
+                    rec_dict[iid] = (movie_info, explanation)
+        return render(request, template_name=template_name, context={'rec_dict': rec_dict})
+    elif explanation_style == 'pem_cem':
+        input_dict = request.session['user_inputs_ratings']
+        recommended_items = request.session['recommended_items']
+
+        exp_output_dict = pem_cem_exp_generator(input_dict, recommended_items)
         # print(exp_output_dict)
         rec_dict = dict()
         for iid, predicted_r in recommended_items:

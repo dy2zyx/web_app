@@ -10,7 +10,7 @@
 
 {% block content %}
 <div style="width: 45%; margin:0 auto;">
-    <h6 class="mb-2 text-info">Note: Please rate at least 3 movies you like. You can either rate movies from a randomly generated movie list or find a particular movie by title using the search bar</h6>
+    <h6 class="mb-2 text-info">Note: Please rate 3 to 5 (at least 3) movies that you like. You can either rate movies from a randomly generated list or find a particular movie by title using the search bar</h6>
 </div>
 
 <div>
@@ -55,7 +55,7 @@
               <form action="/movie_rec" method="post" id="rating_form">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="1" data-max="10" data-step="1" value="9" data-size="md">
+                      <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="4" data-size="md">
                       <div class="input-group-append">
                         <button id="submit_rating" type="submit" class="btn btn-secondary">
                             <i class="fa fa-check fa-lg"></i> Submit
@@ -92,7 +92,7 @@
                   <form action="/movie_rec" method="post" id="rating_form_{{i_data.1}}">
                       {% csrf_token %}
                       <div class="pt-3">
-                          <input id="user_rating_{{i_data.1}}" name="movie_rating" class="rating rating-loading" data-min="1" data-max="10" data-step="1" value="9" data-size="md">
+                          <input id="user_rating_{{i_data.1}}" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="4" data-size="md">
                           <div class="input-group-append">
                             <button id="submit_rating_{{i_data.1}}" type="submit" class="btn btn-secondary">
                                 <i class="fa fa-check fa-lg"></i> Submit
