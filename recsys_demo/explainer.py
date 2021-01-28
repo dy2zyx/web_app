@@ -381,7 +381,7 @@ class ExpKGE:
                     p = result["p"].value
                     o = result["o"].value
                     o_label = result["label_o"].value
-                    i_rec = result["i_rec"].value
+                    i_rec_label = result["i_rec"].value
                     commun_ppt.add(o)
                     if p not in predicate_dict.keys():
                         po_dict = defaultdict(list)
@@ -400,7 +400,11 @@ class ExpKGE:
                     value_dict = predicate_dict[predicate]
                     if not value_dict:
                         del predicate_dict[predicate]
-                patterns_dict[i_rec] = predicate_dict
+
+                if len(predicate_dict.keys()) == 0:
+                    patterns_dict_cem[i_rec] = self.cf_exp_generator(i_rec)
+                else:
+                    patterns_dict[i_rec] = predicate_dict
             else:
                 patterns_dict_cem[i_rec] = self.cf_exp_generator(i_rec)
         return patterns_dict, patterns_dict_cem
@@ -473,5 +477,6 @@ class ExpKGE:
     def cf_exp_generator(self, i_rec):
         d = dict()
         for i_prof, rating in self.input_dict.items():
-            d[i_prof] = len([user for user in self.dict_item_liked_by_users[i_prof] if i_rec in self.dict_user_liked_items[user]]) / len([user for user in self.dict_item_liked_by_users[i_prof]])
+            if not len([user for user in self.dict_item_liked_by_users[i_prof]]) == 0:
+                d[i_prof] = len([user for user in self.dict_item_liked_by_users[i_prof] if i_rec in self.dict_user_liked_items[user]]) / len([user for user in self.dict_item_liked_by_users[i_prof]])
         return d

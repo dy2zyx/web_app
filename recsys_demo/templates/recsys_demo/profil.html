@@ -7,7 +7,7 @@
 {% block title %}Preference profile{% endblock title %}
 {% block content %}
 <div style="max-width: 60%; margin:0 auto;">
-    <h4 class="mb-2 text-info" style="text-align: center;">Your have selected and rated the following {{nb_item}} movies: </h4>
+    <h4 class="mb-2 text-info" style="text-align: center;">Your have selected and rated the following movies. If you want to remove a movie, click the trash icon.</h4>
 </div>
 <br>
 
@@ -15,8 +15,9 @@
 <!--<div style="max-width: 45%; margin:0 auto;">-->
 <!--    <div class="row row-cols-3 row-cols-md-2">-->
 <div class="row" style="max-width: 100%; margin: 0 auto;">
+    <ul class="row list-unstyled">
         {% for iid, i_data in data_dict.items %}
-        <div class="col-sm-3">
+        <li class="col-md-3" id={{iid}}>
             <div class="card mb-3 border-info">
               <div class="row no-gutters">
 <!--                <div class="col-md-8">-->
@@ -45,9 +46,11 @@
                   </div>
                 </div>
               </div>
+                <a class="close"><i class="fa fa-trash-alt"></i></a>
             </div>
-        </div>
+        </li>
         {% endfor %}
+    </ul>
 </div>
 
 <!--    </div>-->
@@ -74,7 +77,25 @@
 {% block javascript %}
 {{ block.super }}
 <script>
+$('.close').click(function(){
+  var $target = $(this).parents('li');
+  var $movie_id = $target.attr('id')
+  console.log($movie_id)
 
+     $.ajax({
+        method: 'POST',
+        url: '/movie_rec/profil',
+        data: {'removed_movie_id': $movie_id},
+        success: function (data) {
+             //this gets called when server returns an OK response
+            },
+        error: function (data) {
+    //                     alert("it didnt work");
+            }
+        });
+
+  $target.hide('slow', function(){ $target.remove(); });
+})
 </script>
 <script src="{% static 'recsys_demo/js/profil.js' %}"></script>
 {% endblock javascript %}

@@ -25,6 +25,7 @@ random_movie_ids = random.sample(movies.keys(), k=10)
 random_movies_dict = dict()
 random_movie_id_dict = dict()
 compteur = 0
+
 for m_id in random_movie_ids:
     random_movies_dict[m_id] = (movies[m_id], compteur)
     random_movie_id_dict[compteur] = m_id
@@ -42,10 +43,18 @@ class UserLoginView(CreateView):
         self.object = form.save(commit=False)
         # self.object.user = self.request.user
         self.object.save()
+        context = {'user_first_name': self.object.first_name,
+                   'user_last_name': self.object.last_name,
+                   'user_id': self.object.id}
+        self.request.session['current_user_metadata'] = context
+        # print(self.request.session.keys())
+        # print(self.object.first_name)
         return HttpResponseRedirect('index')
+        # return render(self.request, 'recsys_demo/index.html', context=context)
 
 
 class IndexView(generic.TemplateView):
+
     template_name = 'recsys_demo/index.html'
 
 
@@ -54,15 +63,19 @@ class ThanksView(generic.TemplateView):
 
 
 def movierec_view(request):
+    # print(request.session['user_inputs_ratings'])
+
     template_name = 'recsys_demo/movie_rec.html'
     # movies = parse_movie_metadata()
     # movie_titles = [movies[m_id]['title'] for m_id in movies.keys()]
 
     if request.is_ajax():
+        # print(request.session['user_inputs_ratings'])
         input_iid = request.POST.get('data_dict[movie_id]')
         input_rating = request.POST.get('data_dict[movie_rating]')
         if not input_iid is None:
             user_inputs_ratings[input_iid] = input_rating
+            print(request.session['user_inputs_ratings'])
             request.session['user_inputs_ratings'] = user_inputs_ratings
             # print(request.session['user_inputs'])
             # print(request.session['user_inputs_ratings'])
@@ -90,27 +103,44 @@ def movierec_view(request):
 def profil_view(request):
     template_name = 'recsys_demo/profil.html'
 
-    if request.is_ajax() and request.POST['action'] == 'first_call':
-        movie_title = request.POST.get('movie_title')
-        print(movie_title)
-        movie_id = [iid for iid in movies.keys() if ('title', movie_title) in movies[iid].items()][0]
-
-        response = HttpResponse(movie_id, content_type="text/html")
-        return response
-
-    if request.is_ajax() and request.POST['action'] == 'second_call':
-        input_iid = request.POST.get('data_dict[movie_id]')
-        input_rating = request.POST.get('data_dict[movie_rating]')
-        if not input_iid is None:
-            user_inputs_ratings[input_iid] = input_rating
-            request.session['user_inputs_ratings'] = user_inputs_ratings
-            response = HttpResponse(input_rating, content_type="text/html")
-            return response
-
+    if request.is_ajax():
+        removed_movie_id = request.POST.get('removed_movie_id')
+        print(removed_movie_id)
+        del request.session['user_inputs_ratings'][str(removed_movie_id)]
+        request.session.modified = True
+        # response = HttpResponse(removed_movie_id, content_type="text/html")
+        # return response
+        # if not 'user_inputs_ratings' in request.session.keys():
+        #     return render(request, template_name=template_name, context={'nb_item': 0})
+        # else:
+        #     data_dict = dict()
+        #     print(request.session['user_inputs_ratings'])
+        #     for iid in request.session['user_inputs_ratings'].keys():
+        #         if iid in movies.keys():
+        #             movie_info = movies[iid]
+        #             movie_rating = request.session['user_inputs_ratings'][iid]
+        #             # movie_rating = str(int(movie_rating) * 2)
+        #             l = list()
+        #             l.append(movie_info)
+        #             l.append(movie_rating)
+        #             data_dict[iid] = l
+        #     print(request.session['user_inputs_ratings'])
+        #     return render(request, template_name=template_name, context={'data_dict': data_dict, 'nb_item': len(data_dict.keys())})
+    #
+    # if request.is_ajax() and request.POST['action'] == 'second_call':
+    #     input_iid = request.POST.get('data_dict[movie_id]')
+    #     input_rating = request.POST.get('data_dict[movie_rating]')
+    #     if not input_iid is None:
+    #         user_inputs_ratings[input_iid] = input_rating
+    #         request.session['user_inputs_ratings'] = user_inputs_ratings
+    #         response = HttpResponse(input_rating, content_type="text/html")
+    #         return response
     if not 'user_inputs_ratings' in request.session.keys():
         return render(request, template_name=template_name, context={'nb_item': 0})
     else:
         data_dict = dict()
+        # request.session.modified = True
+        print(request.session['user_inputs_ratings'])
         for iid in request.session['user_inputs_ratings'].keys():
             if iid in movies.keys():
                 movie_info = movies[iid]
@@ -142,7 +172,7 @@ def recommendation_view(request):
                 if iid in movies.keys():
                     movie_info = movies[iid]
                     rec_dict[iid] = movie_info
-            # print(rec_dict)
+            print(recommended_items)
             return render(request, template_name=template_name, context={'rec_dict': rec_dict})
         if recommender == 'svd':
             recommended_items = svd_recommender(2, request.session['user_inputs_ratings'])
@@ -152,7 +182,7 @@ def recommendation_view(request):
                 if iid in movies.keys():
                     movie_info = movies[iid]
                     rec_dict[iid] = movie_info
-            # print(recommended_items)
+            print(recommended_items)
             return render(request, template_name=template_name, context={'rec_dict': rec_dict})
         if recommender == 'hybride':
             recommended_items = hybride_recommender(2, request.session['user_inputs_ratings'])
@@ -162,23 +192,25 @@ def recommendation_view(request):
                 if iid in movies.keys():
                     movie_info = movies[iid]
                     rec_dict[iid] = movie_info
-            # print(recommended_items)
+            print(recommended_items)
             return render(request, template_name=template_name, context={'rec_dict': rec_dict})
 
 
 def explanation_view(request):
     template_name = 'recsys_demo/explanation.html'
+    current_user_id = request.session['current_user_metadata']['user_id']
     if request.is_ajax():
-        user_info = UserInfo.objects.get()
+        user_info = UserInfo.objects.get(id=current_user_id)
+        # print(user_info)
         feedback_dict = request.POST.get('feedback')
-        print(feedback_dict)
+        print("feedback_dict_1: " + feedback_dict)
         user_info.feed_back_1 = str(feedback_dict)
         user_info.save()
         message = 'update successful'
         response = HttpResponse(message, content_type="text/html")
         return response
 
-    explanation_style = random.choice(['basic', 'broader', 'pem_cem'])
+    explanation_style = random.choice(['basic', 'pem_cem'])
     print(explanation_style)
     if explanation_style == 'basic':
         input_dict = request.session['user_inputs_ratings']
@@ -235,9 +267,10 @@ def explanation_view(request):
 
 def re_eval_view(request):
     template_name = 'recsys_demo/re_eval.html'
-
+    current_user_id = request.session['current_user_metadata']['user_id']
     if request.is_ajax():
-        user_info = UserInfo.objects.get()
+        user_info = UserInfo.objects.get(id=current_user_id)
+        print(user_info)
         feedback_dict = request.POST.get('feedback_2')
         user_info.feed_back_2 = str(feedback_dict)
         user_info.save()

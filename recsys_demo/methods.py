@@ -1,4 +1,3 @@
-import requests
 import os
 import heapq
 import pickle
@@ -10,7 +9,7 @@ import math
 from django.conf import settings
 from scipy.spatial.distance import cosine
 from surprise import SVD, Reader, Dataset
-from SPARQLWrapper import SPARQLWrapper2
+from SPARQLWrapper import SPARQLWrapper2, SPARQLWrapper, JSON
 from collections import defaultdict
 from recsys_demo.explainer import ExpKGE
 
@@ -28,6 +27,7 @@ PROPERTIE_LABEL_DICT = {
     'http://dbpedia.org/ontology/producer': 'producer',
     'http://dbpedia.org/ontology/cinematography': 'cinematography',
     'http://dbpedia.org/ontology/editing': 'editing',
+    'http://dbpedia.org/property/starring': 'actor'
 }
 
 
@@ -59,7 +59,7 @@ def init():
         }
     """
 #     sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-    sparql = SPARQLWrapper2("https://dbpedia.org/sparql")
+    sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
 
     sparql.setQuery(query)
     for result in sparql.query().bindings:
@@ -258,9 +258,10 @@ def basic_builder(query):
 def broader_builder(query):
     print(query)
     candidate_properties = defaultdict(set)
-#     sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
+    # sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
     sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
     sparql.setQuery(query)
+
     for result in sparql.query().bindings:
         o3 = result["o3"].value
         o1 = result["o1"].value
@@ -463,6 +464,7 @@ def generate_exp_from_pattern(pattern_dict):
         po_dict = pattern_dict[ppt]
         ppt = PROPERTIE_LABEL_DICT[ppt] if ppt in PROPERTIE_LABEL_DICT.keys() else ppt
         for key, value in po_dict.items():
+            key = key[1] if isinstance(key, tuple) else key
             movies_exp = " movies" if len(value) > 1 else " movie"
             if len(value) == 1:
                 m_titles_exp = "<b>" + movies[uri_iid_dict[value[0]]]['title'] + "</b>"
@@ -470,7 +472,7 @@ def generate_exp_from_pattern(pattern_dict):
                 m_titles_exp = ""
                 for m in value:
                     m_titles_exp += "<b>" + movies[uri_iid_dict[m]]['title'] + "</b>" + ", "
-            explanation += " You " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + ppt + " is " + "<i>" + key + "</i>" + " as " + m_titles_exp + ". "
+            explanation += " You " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + str(ppt) + " is " + "<i>" + str(key) + "</i>" + " as " + m_titles_exp + ". "
         return explanation
     else:
         count = 1
@@ -483,6 +485,7 @@ def generate_exp_from_pattern(pattern_dict):
             po_dict = pattern_dict[ppt]
             ppt = PROPERTIE_LABEL_DICT[ppt] if ppt in PROPERTIE_LABEL_DICT.keys() else ppt
             for key, value in po_dict.items():
+                key = key[1] if isinstance(key, tuple) else key
                 movies_exp = " movies" if len(value) > 1 else " movie"
                 if len(value) == 1:
                     m_titles_exp = "<b>" + movies[uri_iid_dict[value[0]]]['title'] + "</b>"
@@ -490,7 +493,7 @@ def generate_exp_from_pattern(pattern_dict):
                     m_titles_exp = ""
                     for m in value:
                         m_titles_exp += "<b>" + movies[uri_iid_dict[m]]['title'] + "</b>" + ", "
-                explanation += " You " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + ppt + " is "+ "<i>" + key + "</i>" + " as " + m_titles_exp + ". "
+                explanation += " You " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + str(ppt) + " is "+ "<i>" + str(key) + "</i>" + " as " + m_titles_exp + ". "
             count += 1
         return explanation
 
@@ -563,7 +566,7 @@ def pem_cem_exp_generator(input_dict, recommended_items):
     for rec_item in pattern_dict.keys():
         pattern = pattern_dict[rec_item]
         explantion = generate_exp_from_pattern(pattern)
-        exp_output_dict[uri_iid_dict[rec_item]] = explantion
+        exp_output_dict[rec_item] = explantion
     for rec_item in patterns_dict_cem.keys():
         pattern = patterns_dict_cem[rec_item]
         explantion = generate_exp_from_pattern_cem(pattern)

@@ -28,7 +28,7 @@ class UserInfo(models.Model):
         (higher, 'Professor'),
     ]
 
-    education = models.CharField(choices=education_levels, default=master, max_length=20)
+    education = models.CharField(choices=education_levels, default=None, max_length=20)
 
     feed_back_1 = models.CharField(max_length=100, default="Nothing yet")
     feed_back_2 = models.CharField(max_length=100, default="Nothing yet")

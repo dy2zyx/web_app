@@ -1,0 +1,8 @@
+Django==3.1.5
+django-crispy-forms==1.9.2
+django-pandas==0.6.2
+SPARQLWrapper==1.8.5
+scikit-surprise==1.1.1
+numpy==1.18.4
+pandas==1.1.0
+scipy==1.4.1
