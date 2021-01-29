@@ -20,16 +20,23 @@ class UserInfo(models.Model):
     last_name = models.CharField(max_length=50)
     email = models.EmailField(blank=False)
 
-    master, phd, postdoc, higher = 'ms', 'phd', 'pd', 'h'
+    master, phd, postdoc, higher = 'master student', 'phd student', 'post doc student', 'higher'
     education_levels = [
         (master, 'Master'),
-        (phd, 'P.h.D'),
-        (postdoc, 'Post P.h.D'),
+        (phd, 'Ph.D'),
+        (postdoc, 'Post Ph.D'),
         (higher, 'Professor'),
     ]
 
     education = models.CharField(choices=education_levels, default=None, max_length=20)
 
+    male, female = 'male', 'female'
+    sex = [
+        (male, 'Male'),
+        (female, 'Female'),
+    ]
+
+    sex = models.CharField(choices=sex, default=None, max_length=20, null=True)
     feed_back_1 = models.CharField(max_length=100, default="Nothing yet")
     feed_back_2 = models.CharField(max_length=100, default="Nothing yet")
 

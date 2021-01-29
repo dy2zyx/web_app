@@ -35,7 +35,7 @@ for m_id in random_movie_ids:
 class UserLoginView(CreateView):
     template_name = 'recsys_demo/login.html'
     model = UserInfo
-    fields = ('first_name', 'last_name', 'email', 'education')
+    fields = ('first_name', 'last_name', 'sex', 'email', 'education')
 
     def form_valid(self, form):
         # if self.request.method == 'POST':
@@ -75,7 +75,6 @@ def movierec_view(request):
         input_rating = request.POST.get('data_dict[movie_rating]')
         if not input_iid is None:
             user_inputs_ratings[input_iid] = input_rating
-            print(request.session['user_inputs_ratings'])
             request.session['user_inputs_ratings'] = user_inputs_ratings
             # print(request.session['user_inputs'])
             # print(request.session['user_inputs_ratings'])
@@ -162,10 +161,11 @@ def recommendation_view(request):
         messages.warning(request, warning_msg)
         return HttpResponseRedirect('profil')
     else:
-        recommender = random.choice(['cbf', 'svd', 'hybride'])
+        # recommender = random.choice(['cbf', 'svd', 'hybride'])
+        recommender = random.choice(['svd'])
         print(recommender)
         if recommender == 'cbf':
-            recommended_items = cbf_recommender(2, request.session['user_inputs_ratings'])
+            recommended_items = cbf_recommender(1, request.session['user_inputs_ratings'])
             request.session['recommended_items'] = recommended_items
             rec_dict = dict()
             for iid, predicted_r in recommended_items:
@@ -210,7 +210,8 @@ def explanation_view(request):
         response = HttpResponse(message, content_type="text/html")
         return response
 
-    explanation_style = random.choice(['basic', 'pem_cem'])
+    # explanation_style = random.choice(['basic', 'pem_cem'])
+    explanation_style = random.choice(['pem_cem'])
     print(explanation_style)
     if explanation_style == 'basic':
         input_dict = request.session['user_inputs_ratings']
