@@ -1,2 +1,3 @@
-# web_app
+# Movie recommender system for evaluating recommendation explanations
+
 A django-3 based movie recommendation system application with explicability functionalities
