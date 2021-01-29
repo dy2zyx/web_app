@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Movie RecSys for evaluating recommendation explanations
 
 A movie recommendation system web application based on Django and Docker
@@ -30,8 +29,3 @@ To check if it Docker is successfully installed, open a terminal and run:
 5. Open a web navigator and go to ```localhost:8000/login``` If everything goes well, you will get into a login form.
 
 6. To shut down the application, in the terminal, run: ```make compose-stop```
-=======
-# Movie recommender system for evaluating recommendation explanations
-
-A movie recommendation system web application based on Django and Docker-compose
->>>>>>> b07448d7a50cb1d38955ce5066ae2e0bffe1af16
