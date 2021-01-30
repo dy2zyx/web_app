@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views import generic
 from django.views import View
-from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, hybride_recommender, basic_exp_generator, broader_exp_generator, pem_cem_exp_generator
+from .methods import parse_movie_metadata, movies, iid_uri_dict, init, cbf_recommender, svd_recommender, hybride_recommender, basic_exp_generator, broader_exp_generator, pem_cem_exp_generator
 from .forms import MovieTitleForm
 from collections import defaultdict
 from django.views.generic import CreateView

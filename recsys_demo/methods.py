@@ -83,6 +83,8 @@ def parse_movie_metadata():
             movie['release_date'] = release_date
             movie['poster_path'] = poster_path
             movie['overview'] = overview
+            # add movie uri
+            movie['dbpedia_uri'] = iid_uri_dict[id]
             movies[id] = movie
 
             line = movie_data.readline()
