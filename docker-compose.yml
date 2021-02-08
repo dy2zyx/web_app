@@ -3,11 +3,21 @@ version: "3.7"
 x-service-volumes: &service-volumes
   - ./:/app/:rw,cached
 
+x-database-variable: &database-variables
+  POSTGRES_DB: postgres
+  POSTGRES_USER: ceris
+  POSTGRES_PASSWORD: ceris
+
+x-app-variables: &app-variables
+  <<: *database-variables
+  POSTGRES_HOST: postgres
+
 services:
   website:
     image: web_app:latest
     command: python manage.py runserver 0.0.0.0:8000
     volumes: *service-volumes
+    environment: *app-variables
     depends_on:
       - db_migrate
     ports:
@@ -16,3 +26,18 @@ services:
     image: web_app:latest
     command: python manage.py migrate
     volumes: *service-volumes
+    environment: *app-variables
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment: *database-variables
+    volumes:
+    - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
+

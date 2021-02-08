@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import random
 import math
+import scipy
 
 from django.conf import settings
 from scipy.spatial.distance import cosine
@@ -29,7 +30,6 @@ PROPERTIE_LABEL_DICT = {
     'http://dbpedia.org/ontology/editing': 'editing',
     'http://dbpedia.org/property/starring': 'actor'
 }
-
 
 def init():
     with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/dict_item_emb_v4.pickle'), 'rb') as file:
