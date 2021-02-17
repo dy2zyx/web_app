@@ -72,7 +72,8 @@ def movierec_view(request):
     if request.is_ajax():
         # print(request.session['user_inputs_ratings'])
         input_iid = request.POST.get('data_dict[movie_id]')
-        input_rating = request.POST.get('data_dict[movie_rating]')
+        # input_rating = request.POST.get('data_dict[movie_rating]')
+        input_rating = 5
         if not input_iid is None:
             user_inputs_ratings[input_iid] = input_rating
             request.session['user_inputs_ratings'] = user_inputs_ratings
@@ -96,7 +97,7 @@ def movierec_view(request):
         else:
             print(form.errors.as_data())
             return render(request, template_name, {'form': form, 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
-    return render(request, template_name=template_name, context={'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
+    return render(request, template_name=template_name, context={'nb_movies_in_base': len(movies.keys()), 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
 
 
 def profil_view(request):
@@ -156,8 +157,8 @@ def profil_view(request):
 def recommendation_view(request):
     template_name = 'recsys_demo/recommendation.html'
 
-    if 'user_inputs_ratings' not in request.session.keys() or len(request.session['user_inputs_ratings'].keys()) < 3:
-        warning_msg = 'Note that you have to rate at least 3 items before asking for recommendations'
+    if 'user_inputs_ratings' not in request.session.keys() or len(request.session['user_inputs_ratings'].keys()) < 5:
+        warning_msg = 'Note that you have to choose at least 5 liked movies before asking for recommendations'
         messages.warning(request, warning_msg)
         return HttpResponseRedirect('profil')
     else:

@@ -6,9 +6,20 @@
 {% endblock css %}
 {% block title %}Preference profile{% endblock title %}
 {% block content %}
-<div style="max-width: 60%; margin:0 auto;">
-    <h4 class="mb-2 text-info" style="text-align: center;">Your have selected and rated the following movies. If you want to remove a movie, click the trash icon.</h4>
+<div style="width: 45%; margin:0 auto;">
+    <div class="alert alert-success">
+<!--      <h4 class="alert-heading">How to...</h4>-->
+      <h4 class="mb-0">You have selected the following liked movies. You can either:</h4>
+        <br>
+        <ul>
+            <li>Remove movies from the list by clicking the trash icon,</li>
+            <li>Add more movies in your profile by clicking "Add more movies", </li>
+            <li style="list-style-type:none"><b>OR</b></li>
+            <li><p class="mb-0">Get for recommendations. Please verify your selected movies before asking for recommendations.</p></li>
+        </ul>
+    </div>
 </div>
+
 <br>
 
 {% if data_dict %}
@@ -33,18 +44,18 @@
 <!--                      <p class="card-text">{{  i_data.0.overview  }} </p>-->
                       <h6 class="card-subtitle mb-2 text-info">Release date</h6>
                       <p class="card-text">{{  i_data.0.release_date  }} </p>
-                      <h6 class="card-subtitle mb-2 text-info">Your rating given to this movie</h6>
-                      <form action="/movie_rec/profil" method="post" id="rating_form">
+<!--                      <h6 class="card-subtitle mb-2 text-info">Your rating given to this movie</h6>-->
+<!--                      <form action="/movie_rec/profil" method="post" id="rating_form">-->
                           {% csrf_token %}
-                          <div class="pt-3">
-                              <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="{{i_data.1}}" data-size="md" disabled>
+<!--                          <div class="pt-3">-->
+<!--                              <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="{{i_data.1}}" data-size="md" disabled>-->
 <!--                              <div class="input-group-append">-->
 <!--                                <button id="submit_rating" type="submit" class="btn btn-secondary">-->
 <!--                                    Change rating-->
 <!--                                </button>-->
 <!--                              </div>-->
-                          </div>
-                      </form>
+<!--                          </div>-->
+<!--                      </form>-->
                   </div>
                 </div>
               </div>
@@ -60,10 +71,10 @@
 {% endif %}
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
     <form action="/movie_rec">
-        <button type="submit" class="btn btn-secondary" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-left fa-lg"></i> Rate more movies</button>
+        <button type="submit" class="btn btn-secondary" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-left fa-lg"></i> Add more movies</button>
     </form>
     <form action="/movie_rec/recommendation">
-        <button type="submit" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Ask for recommendations</button>
+        <button type="submit" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Get for recommendations</button>
     </form>
     {% if messages %}
         <ul class="messages list-group-flush">
@@ -72,6 +83,10 @@
             {% endfor %}
         </ul>
     {% endif %}
+    <div class="alert alert-success">
+<!--      <h4 class="alert-heading">How to...</h4>-->
+      <h6 class="mb-0">Please verify your selected movies (e.g. delete undesired ones) before asking for recommendations.</h6>
+    </div>
 </div>
 </br>
 {% endblock content %}

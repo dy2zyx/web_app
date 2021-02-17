@@ -30,9 +30,9 @@ class ExpKGE:
         self.alpha = alpha
         self.beta = beta
         self.movies = dict()
-        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/dict_item_emb_v4.pickle'), 'rb') as file:
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/dict_item_emb_v5.pickle'), 'rb') as file:
             self.dict_item_embedding = pickle.load(file)
-        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/movies_v4.csv'), 'r') as movie_data:
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/movies_v5.csv'), 'r') as movie_data:
             line = movie_data.readline()
 
             while line != None and line != '':
@@ -176,7 +176,7 @@ class ExpKGE:
     def mapper(self):
         iid_uri_dict = dict()
         uri_iid_dict = dict()
-        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/Mapping_upgrated_v4.csv'), 'r') as f:
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/Mapping_upgrated_v5.csv'), 'r') as f:
             lines = f.readlines()
             for line in lines:
                 if line != None and line != '':

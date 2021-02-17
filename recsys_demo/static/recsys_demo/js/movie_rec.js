@@ -1,9 +1,9 @@
 $(document).ready(function () {
     $("#submit_rating").on('click', function () {
-        $("#user_rating").rating('create');
-//        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating").rating('create').val()
-    console.log(movie_id)
+//        $("#user_rating").rating('create');
+//    var input_rating = $("#user_rating").rating('create').val()
+    var input_rating = 5;
+//    console.log(movie_id)
     var data_dict = {};
     data_dict.movie_id = movie_id;
     data_dict.movie_rating = input_rating;
@@ -24,9 +24,9 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_0").on('click', function () {
-        $("#user_rating_0").rating('create');
-//        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_0").rating('create').val()
+//        $("#user_rating_0").rating('create');
+//    var input_rating = $("#user_rating_0").rating('create').val()
+    var input_rating = 5;
     var data_dict = {};
     data_dict.movie_id = random_movie_id_dict[0];
     data_dict.movie_rating = input_rating;
@@ -47,9 +47,10 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_1").on('click', function () {
-        $("#user_rating_1").rating('create');
+//        $("#user_rating_1").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_1").rating('create').val()
+//    var input_rating = $("#user_rating_1").rating('create').val()
+    var input_rating = 5;
     var data_dict = {};
     data_dict.movie_id = random_movie_id_dict[1];
     data_dict.movie_rating = input_rating;
@@ -70,10 +71,11 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_2").on('click', function () {
-        $("#user_rating_2").rating('create');
+//        $("#user_rating_2").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_2").rating('create').val()
+//    var input_rating = $("#user_rating_2").rating('create').val()
     var data_dict = {};
+    var input_rating = 5;
     data_dict.movie_id = random_movie_id_dict[2];
     data_dict.movie_rating = input_rating;
 
@@ -93,10 +95,11 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_3").on('click', function () {
-        $("#user_rating_3").rating('create');
+//        $("#user_rating_3").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_3").rating('create').val()
+//    var input_rating = $("#user_rating_3").rating('create').val()
     var data_dict = {};
+    var input_rating = 5;
     data_dict.movie_id = random_movie_id_dict[3];
     data_dict.movie_rating = input_rating;
 
@@ -116,11 +119,12 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_4").on('click', function () {
-        $("#user_rating_4").rating('create');
+//        $("#user_rating_4").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_4").rating('create').val()
-    console.log(movie_id)
+//    var input_rating = $("#user_rating_4").rating('create').val()
+//    console.log(movie_id)
     var data_dict = {};
+    var input_rating = 5;
     data_dict.movie_id = random_movie_id_dict[4];
     data_dict.movie_rating = input_rating;
 
@@ -140,11 +144,12 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_5").on('click', function () {
-        $("#user_rating_5").rating('create');
+//        $("#user_rating_5").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_5").rating('create').val()
-    console.log(movie_id)
+//    var input_rating = $("#user_rating_5").rating('create').val()
+//    console.log(movie_id)
     var data_dict = {};
+    var input_rating = 5;
     data_dict.movie_id = random_movie_id_dict[5];
     data_dict.movie_rating = input_rating;
 
@@ -164,11 +169,12 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_6").on('click', function () {
-        $("#user_rating_6").rating('create');
+//        $("#user_rating_6").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_6").rating('create').val()
-    console.log(movie_id)
+//    var input_rating = $("#user_rating_6").rating('create').val()
+//    console.log(movie_id)
     var data_dict = {};
+    var input_rating = 5;
     data_dict.movie_id = random_movie_id_dict[6];
     data_dict.movie_rating = input_rating;
 
@@ -188,11 +194,12 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_7").on('click', function () {
-        $("#user_rating_7").rating('create');
+//        $("#user_rating_7").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_7").rating('create').val()
-    console.log(movie_id)
+//    var input_rating = $("#user_rating_7").rating('create').val()
+//    console.log(movie_id)
     var data_dict = {};
+    var input_rating = 5;
     data_dict.movie_id = random_movie_id_dict[7];
     data_dict.movie_rating = input_rating;
 
@@ -212,11 +219,12 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_8").on('click', function () {
-        $("#user_rating_8").rating('create');
+//        $("#user_rating_8").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_8").rating('create').val()
-    console.log(movie_id)
+//    var input_rating = $("#user_rating_8").rating('create').val()
+//    console.log(movie_id)
     var data_dict = {};
+    var input_rating = 5;
     data_dict.movie_id = random_movie_id_dict[8];
     data_dict.movie_rating = input_rating;
 
@@ -236,11 +244,12 @@ $(document).ready(function () {
     });
 
     $("#submit_rating_9").on('click', function () {
-        $("#user_rating_9").rating('create');
+//        $("#user_rating_9").rating('create');
 //        alert($("#user_rating").rating('create').val());
-    var input_rating = $("#user_rating_9").rating('create').val()
-    console.log(movie_id)
+//    var input_rating = $("#user_rating_9").rating('create').val()
+//    console.log(movie_id)
     var data_dict = {};
+    var input_rating = 5;
     data_dict.movie_id = random_movie_id_dict[9];
     data_dict.movie_rating = input_rating;
 

@@ -32,7 +32,7 @@ PROPERTIE_LABEL_DICT = {
 }
 
 def init():
-    with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/dict_item_emb_v4.pickle'), 'rb') as file:
+    with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/dict_item_emb_v5.pickle'), 'rb') as file:
         global dict_item_embedding
         dict_item_embedding = pickle.load(file)
 
@@ -40,7 +40,7 @@ def init():
         global pretrain_svd
         pretrain_svd = pickle.load(svd_model)
 
-    with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/Mapping_upgrated_v4.csv'), 'r') as f:
+    with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/Mapping_upgrated_v5.csv'), 'r') as f:
         lines = f.readlines()
         for line in lines:
             if line != None and line != '':
@@ -68,7 +68,7 @@ def init():
 
 def parse_movie_metadata():
     # movies_by_id = dict()
-    with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/movies_v4.csv'), 'r') as movie_data:
+    with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/movies_v5.csv'), 'r') as movie_data:
         line = movie_data.readline()
 
         while line != None and line != '':
@@ -237,7 +237,7 @@ def generate_queries(input_dict, recommended_items):
          ?o1 ?p1 ?o3 .
          ?o2 ?p1 ?o3 .
          """ + filter_profil + "\n" + filter_rec + """
-         filter regex(str(?o3), \"http://dbpedia.org/resource\") 
+         filter regex(str(?o3), \"http://dbpedia.org/resource\")
          filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
          filter (?p1 = dct:subject || ?p1 = skos:broader)
         }

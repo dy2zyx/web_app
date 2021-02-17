@@ -10,7 +10,15 @@
 
 {% block content %}
 <div style="width: 45%; margin:0 auto;">
-    <h6 class="mb-2 text-info">Note: Please rate 3 to 5 (at least 3) movies that you like. You can either rate movies from a randomly generated list or find a particular movie by title using the search bar</h6>
+    <div class="alert alert-success">
+      <h4 class="alert-heading">How to...</h4>
+      <p class="mb-0">Please select at least 5 movies that you like. You can either:</p>
+        <ul>
+            <li>Find your desired movies by title using the search bar.</li>
+            <li style="list-style-type:none"><b>OR</b></li>
+            <li><p class="mb-0">Choose movies from a randomly generated list.</p></li>
+        </ul>
+    </div>
 </div>
 
 <div>
@@ -18,7 +26,7 @@
     {%  csrf_token  %}
 <!--        <span style="position:relative; display: inline-block;">-->
         <div class="input-group mb-3" style="width: 45%; margin:0 auto;">
-            <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Enter a movie title" autocomplete="off" spellcheck="false">
+            <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Search among {{nb_movies_in_base}} movies by entering a title" autocomplete="off" spellcheck="false">
                 <span class="input-group-btn">
                     <button id="search_btn" type="submit" class="btn btn-outline-secondary">
                         <i class="fa fa-search"></i>
@@ -53,14 +61,14 @@
               <p class="card-text">{{  movie_info.overview  }} </p>
               <h6 class="card-subtitle mb-2 text-info">Release date</h6>
               <p class="card-text">{{  movie_info.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Rate this movie</h6>
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate this movie</h6>-->
               <form action="/movie_rec" method="post" id="rating_form">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="user_rating" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="4" data-size="md">
+<!--                      <input id="user_rating" name="movie_rating">-->
                       <div class="input-group-append">
-                        <button id="submit_rating" type="submit" class="btn btn-secondary">
-                            <i class="fa fa-check fa-lg"></i> Submit
+                        <button id="submit_rating" type="submit" class="btn btn-success" onClick='showMessage()'>
+                            <i class="fa fa-check fa-lg"></i> Add to profile
                         </button>
                       </div>
                   </div>
@@ -92,14 +100,14 @@
                   <h6 class="card-subtitle mb-2 text-info">Release date</h6>
                   <p class="card-text">{{  i_data.0.release_date  }} </p>
                   <hr/>
-                  <h6 class="card-subtitle mb-2 text-info">Rate this movie</h6>
+<!--                  <h6 class="card-subtitle mb-2 text-info">Rate this movie</h6>-->
                   <form action="/movie_rec" method="post" id="rating_form_{{i_data.1}}">
                       {% csrf_token %}
                       <div class="pt-3">
-                          <input id="user_rating_{{i_data.1}}" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="4" data-size="md">
+<!--                          <input id="user_rating_{{i_data.1}}" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="4" data-size="md">-->
                           <div class="input-group-append">
-                            <button id="submit_rating_{{i_data.1}}" type="submit" class="btn btn-secondary">
-                                <i class="fa fa-check fa-lg"></i> Submit
+                            <button id="submit_rating_{{i_data.1}}" type="submit" class="btn btn-success" onClick='showMessage()'>
+                                <i class="fa fa-check fa-lg"></i> Add to profile
                             </button>
                           </div>
                       </div>
@@ -150,6 +158,9 @@
         });
     });
 
+function showMessage(){
+	 alert("Movie added to your profile.");
+}
 </script>
 <script src="{% static 'recsys_demo/js/movie_rec.js' %}"></script>
 
