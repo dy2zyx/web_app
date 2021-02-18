@@ -6,15 +6,29 @@
 {% endblock css %}
 {% block title %}Recommendation details and re-rate{% endblock title %}
 {% block content %}
-<div style="max-width: 60%; margin:0 auto;">
-    <h4 class="mb-2 text-info" style="text-align: center;">In this section, you will be asked to: </h4>
-    <h5 class="mb-2 text-dark" style="text-align: center;">1. Click the link of each recommended movie, which will provide you with more information about the movie, such as the genre, the actors, the director etc. </h5>
-    <h5 class="mb-2 text-dark" style="text-align: center;">2. Rate again the recommended movie and submit your feedback </h5>
+<!--<div style="max-width: 60%; margin:0 auto;">-->
+<!--    <h4 class="mb-2 text-info" style="text-align: center;">Again?? Don't worry! We have almost done this!</h4>-->
+<!--</div>-->
+
+<div style="width: 45%; margin:0 auto;">
+    <div class="alert alert-success">
+      <h4 class="alert-heading">How to...</h4>
+      <p class="mb-0">In this section we provide you with more information about each movie, we ask you to:</p>
+        <ul>
+            <li>1. If you'd like to, click the link of each recommended movie, which will provide you with more information about it, such as the genre, the actors, the director etc.</li>
+            <li>2. Rate again each recommended item (change mind after knowing more details about the movie?)</li>
+        </ul>
+    </div>
 </div>
 <br>
 
-{% if recomm_dict %}
-{% for iid, i_data in recomm_dict.items %}
+{% if recomm_dicts %}
+<div class="row">
+<div class="col">
+<div class="alert alert-success">
+    <h5 class="alert-heading">Explanation Style 1</h5>
+</div>
+{% for iid, i_data in recomm_dicts.0.items %}
     <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
@@ -27,11 +41,11 @@
               <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
               <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
               <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again (Please check the movie details first!)</h6>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
               <form method="post" id="rating_form_Q1_2">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_2_{{iid}}" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_2_{{iid}}_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -39,16 +53,194 @@
       </div>
     </div>
 {% endfor %}
+<hr class="sep-2" />
+{% for iid, i_data in recomm_dicts.1.items %}
+    <div class="card mb-3 border-success" style="width: 60%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+<hr class="sep-2" />
+{% for iid, i_data in recomm_dicts.2.items %}
+    <div class="card mb-3 border-warning" style="width: 60%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+</div>
+<div class="col">
+<div class="alert alert-success">
+    <h5 class="alert-heading">Explanation Style 2</h5>
+</div>
+{% for iid, i_data in recomm_dicts.0.items %}
+    <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+<hr class="sep-2" />
+{% for iid, i_data in recomm_dicts.1.items %}
+    <div class="card mb-3 border-success" style="width: 60%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+<hr class="sep-2" />
+{% for iid, i_data in recomm_dicts.2.items %}
+    <div class="card mb-3 border-warning" style="width: 60%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+</div>
+</div>
 {% endif %}
 
+<!--<div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">-->
+<!--    <form action="/movie_rec/recommendation">-->
+<!--        <button type="submit" id="feedback_exp_top1_re" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Submit and go next</button>-->
+<!--    </form>-->
+<!--</div>-->
+
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
-    <form action="/thanks">
-        <button type="submit" id="feedback_exp2" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Submit </button>
+<!--    <form action="/movie_rec/recommendation/re_eval">-->
+        <button type="submit" id="feedback_exp_top1_2" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Submit ratings </button>
+<!--    </form>-->
+</div>
+
+<br>
+<div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
+    <form action="/movie_rec/recommendation/explanation">
+        <button type="submit" onclick="toggle('loading_exp2')" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Evaluate explanations for each recommendation list</button>
     </form>
+    <div class="d-flex flex-column align-items-center justify-content-center" id="loading_exp2" style="visibility:hidden;">
+       <div class="row">
+           <div class="spinner-border text-info" role="status">
+               <span class="sr-only">Loading...</span>
+           </div>
+        </div>
+        <div class="row text-info">
+          <strong>Explanations are being processed, this may take time</strong>
+        </div>
+    </div>
 </div>
 {% endblock content %}
 
 {% block javascript %}
 {{ block.super }}
 <script src="{% static 'recsys_demo/js/movie_re_eval.js' %}"></script>
+<script>
+function toggle(anId)
+{
+	node = document.getElementById(anId);
+	if (node.style.visibility=="hidden")
+	{
+		// Contenu caché, le montrer
+		node.style.visibility = "visible";
+		node.style.height = "auto";			// Optionnel rétablir la hauteur
+	}
+	else
+	{
+		// Contenu visible, le cacher
+		node.style.visibility = "hidden";
+		node.style.height = "0";			// Optionnel libérer l'espace
+	}
+}
+</script>
+
 {% endblock javascript %}

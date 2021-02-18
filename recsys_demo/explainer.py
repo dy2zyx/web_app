@@ -68,8 +68,7 @@ class ExpKGE:
             'http://dbpedia.org/ontology/cinematography': 'cinematography',
             'http://dbpedia.org/ontology/editing': 'editing',
         }
-        # with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/svd_pretrain_demo.pickle'), 'rb') as svd_model:
-        #     self.pretrain_svd = pickle.load(svd_model)
+
         self.iid_uri_dict, self.uri_iid_dict = self.mapper()
         self.nb_movie = self.get_total_item_number()
         self.recommended_items = recommended_items
@@ -81,97 +80,6 @@ class ExpKGE:
         with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/item_cluster_dict.pickle'), 'rb') as file:
             self.item_cluster_dict = pickle.load(file)
 
-    # def recommend_items(self):
-    #     if self.recommender == 'cbf':
-    #         recommended_items = self.cbf_recommender()
-    #         return recommended_items
-    #     elif self.recommender == 'svd':
-    #         recommended_items = self.svd_recommender()
-    #         return recommended_items
-    #     elif self.recommender == 'hybrid':
-    #         recommended_items = self.hybride_recommender()
-    #         return recommended_items
-    #     else:
-    #         print("Warning, recommender name should be in 'cbf', 'svd' and 'hybrid'")
-
-    # def compute_sim(self, i, j):
-    #     ITEM = 'http://example.org/rating_ontology/Item/Item_'
-    #     i_emb = self.dict_item_embedding[ITEM + i]
-    #     j_emb = self.dict_item_embedding[ITEM + j]
-    #     return 1 - cosine(i_emb, j_emb)
-
-    # def cbf_predict(self, candidate):
-    #     length_profil = len(self.input_dict.keys())
-    #     rating = 0
-    #     for item in self.input_dict.keys():
-    #         sim_item_candidate = self.compute_sim(candidate, item)
-    #         if int(self.input_dict[item]) > 6:
-    #             rating += sim_item_candidate
-    #         else:
-    #             rating -= sim_item_candidate
-    #     return rating / length_profil
-
-    # def cbf_recommender(self):
-    #     top_n = list()
-    #     rated_items = self.input_dict.keys()
-    #     candidate_items = [iid for iid in self.movies.keys() if iid not in rated_items]
-    #     for candidate in candidate_items:
-    #         predicted_r = self.cbf_predict(candidate)
-    #         top_n.append((candidate, predicted_r))
-    #     top_n = heapq.nlargest(self.nb_rec, top_n, key=lambda x:x[1])
-    #     return top_n
-
-    # def svd_predict(self, u_f, candidate):
-    #     candidate_factor = self.pretrain_svd.qi[self.pretrain_svd.trainset.to_inner_iid(candidate)]
-    #     rating =np.dot(candidate_factor, u_f)
-    #     return rating
-
-    # def svd_recommender(self):
-    #     user = '99999'
-    #     list_ratings = list()
-    #     for iid, r in self.input_dict.items():
-    #         list_ratings.append((user, iid, r))
-    #     df = pd.DataFrame(list_ratings, columns =['userID', 'itemID', 'rating'])
-    #     reader = Reader(rating_scale=(0, 10))
-    #     data = Dataset.load_from_df(df=df, reader=reader)
-    #     train = data.build_full_trainset()
-    #     svd = SVD()
-    #     svd.fit(train)
-    #     user_factor = svd.pu[svd.trainset.to_inner_uid(user)]
-    #
-    #     top_n = list()
-    #     rated_items = self.input_dict.keys()
-    #     candidate_items = [iid for iid in self.movies.keys() if iid not in rated_items]
-    #     for candidate in candidate_items:
-    #         predicted_r = self.svd_predict(user_factor, candidate)
-    #         top_n.append((candidate, predicted_r))
-    #     top_n = heapq.nlargest(self.nb_rec, top_n, key=lambda x:x[1])
-    #     return top_n
-
-    # def hybride_recommender(self):
-    #     user = '99999'
-    #     list_ratings = list()
-    #     for iid, r in self.input_dict.items():
-    #         list_ratings.append((user, iid, r))
-    #     df = pd.DataFrame(list_ratings, columns =['userID', 'itemID', 'rating'])
-    #     reader = Reader(rating_scale=(0, 10))
-    #     data = Dataset.load_from_df(df=df, reader=reader)
-    #     train = data.build_full_trainset()
-    #     svd = SVD()
-    #     svd.fit(train)
-    #     user_factor = svd.pu[svd.trainset.to_inner_uid(user)]
-    #
-    #     top_n = list()
-    #     rated_items = self.input_dict.keys()
-    #     candidate_items = [iid for iid in self.movies.keys() if iid not in rated_items]
-    #
-    #     for candidate in candidate_items:
-    #         predicted_r_svd = self.svd_predict(user_factor, candidate)
-    #         predicted_r_cbf = self.cbf_predict(candidate)
-    #         predicted_r = (predicted_r_cbf + predicted_r_svd) / 2
-    #         top_n.append((candidate, predicted_r))
-    #     top_n = heapq.nlargest(self.nb_rec, top_n, key=lambda x:x[1])
-    #     return top_n
 
     def mapper(self):
         iid_uri_dict = dict()
@@ -184,6 +92,7 @@ class ExpKGE:
                     iid_uri_dict[iid] = uri
                     uri_iid_dict[uri] = iid
         return iid_uri_dict, uri_iid_dict
+
 
     def get_total_item_number(self):
         query = """
@@ -255,21 +164,6 @@ class ExpKGE:
         # print(candidate_properties)
         return candidate_properties
 
-    def broader_builder(self, query):
-    #     query = query_broader_builder
-        candidate_properties = defaultdict(set)
-    #     sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-        sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-        sparql.setQuery(query)
-        results = sparql.query()
-        for result in sparql.query().bindings:
-            o3 = result["o3"].value
-            o1 = result["o1"].value
-            o2 = result["o2"].value
-            candidate_properties[o3].add(o1)
-            candidate_properties[o3].add(o2)
-        return candidate_properties
-
     def compute_p_score(self, p, filter_profil, filter_rec):
         i_u = len(self.input_dict.keys())
         i_r = len(self.recommended_items)
@@ -289,11 +183,11 @@ class ExpKGE:
         sparql.setQuery(query)
         # results = sparql.query()
         for result in sparql.query().bindings:
-            nb_i_prof = int(result["nb_i_prof"].value)
-            nb_i_rec = int(result["nb_i_rec"].value)
-            p_freq = int(result["nb_movie"].value)
+            nb_i_prof = float(result["nb_i_prof"].value)
+            nb_i_rec = float(result["nb_i_rec"].value)
+            p_freq = float(result["nb_movie"].value)
 
-        idf_p = 0 if p_freq == 0 else math.log(self.nb_movie / p_freq)
+        idf_p = 0 if p_freq == 0 else math.log2(self.nb_movie / p_freq)
         p_score = (self.alpha * nb_i_prof / i_u + self.beta * nb_i_rec / i_r) * idf_p
         return p_score
 
@@ -304,38 +198,6 @@ class ExpKGE:
 
             basic_p_scores[p] = p_score
         return basic_p_scores
-
-    def rank_p_broader(self, candidate_properties_broader, basic_p_scores, filter_profil, filter_rec):
-        broader_p_scores = dict()
-        for b in candidate_properties_broader.keys():
-            basic_properties = candidate_properties_broader[b]
-            b_score = 0
-
-            for basic_p in basic_properties:
-                if basic_p not in basic_p_scores.keys():
-                    b_score += self.compute_p_score(basic_p, filter_profil, filter_rec)
-                else:
-                    b_score += basic_p_scores[basic_p]
-
-            query1 = """
-                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX dbo: <http://dbpedia.org/ontology/>
-                select (count(distinct ?movie) as ?nb_movie)
-                where {
-                    ?movie rdf:type dbo:Film .
-                    ?movie ?p <""" + b + """> .
-                }
-            """
-    #         sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-            sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-            sparql.setQuery(query1)
-            for result in sparql.query().bindings:
-                b_freq = int(result["nb_movie"].value)
-
-            idf_b = 0 if b_freq == 0 else math.log(self.nb_movie / b_freq)
-            b_score = b_score * idf_b
-            broader_p_scores[b] = b_score
-        return broader_p_scores
 
     def basic_patterns(self, all_properties):
         patterns_dict = dict()

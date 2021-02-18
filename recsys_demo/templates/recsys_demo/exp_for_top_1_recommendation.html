@@ -7,13 +7,13 @@
 {% block title %}Explantions of recommendations{% endblock title %}
 {% block content %}
 <div style="max-width: 60%; margin:0 auto;">
-    <h4 class="mb-2 text-info" style="text-align: center;">Below are recommended movies along with their explanations.</h4>
+    <h4 class="mb-2 text-info" style="text-align: center;">Below are the top-3 recommended movies (1 per group) along with their explanations.</h4>
 </div>
 
 <div style="width: 45%; margin:0 auto;">
     <div class="alert alert-success">
       <h4 class="alert-heading">How to...</h4>
-      <p class="mb-0">For each group of recommendations and each recommended movie, we provide you with two different explanation styles (left and right). You are asked to:</p>
+      <p class="mb-0">For each recommended movie, we provide you with two different explanation styles (left and right). You are asked to:</p>
         <ul>
             <li>1. Read the explanation of the recommendation,</li>
             <li>2. Rate the recommended item (1 - 5 stars),</li>
@@ -26,6 +26,9 @@
 {% if rec_dicts %}
 <div class="row">
 <div class="col">
+    <div class="alert alert-success">
+        <h5 class="alert-heading">Explanation Style 1</h5>
+    </div>
     {% for iid, i_data in rec_dicts.0.items %}
     <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
       <div class="row no-gutters">
@@ -47,7 +50,7 @@
               <form method="post" id="rating_form_Q1">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_{{iid}}_cbf_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_{{iid}}_cbf_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -77,7 +80,7 @@
               <form method="post" id="rating_form_Q1">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_{{iid}}_svd_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_{{iid}}_svd_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -107,7 +110,7 @@
               <form method="post" id="rating_form_Q1">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_{{iid}}_hybrid_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_{{iid}}_hybrid_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -130,7 +133,7 @@
           <form method="post" id="rating_form_Q2_explod">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q2_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q2_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -138,7 +141,7 @@
           <form method="post" id="rating_form_Q3_explod">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q3_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q3_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -146,7 +149,7 @@
           <form method="post" id="rating_form_Q4_explod">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q4_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q4_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -154,7 +157,7 @@
           <form method="post" id="rating_form_Q5_explod">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q5_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q5_explod" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -164,6 +167,9 @@
  </div>
 </div>
 <div class="col">
+    <div class="alert alert-success">
+        <h5 class="alert-heading">Explanation Style 2</h5>
+    </div>
     {% for iid, i_data in rec_dicts.0.items %}
     <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
       <div class="row no-gutters">
@@ -185,7 +191,7 @@
               <form method="post" id="rating_form_Q1">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_{{iid}}_cbf_pemcem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_{{iid}}_cbf_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -215,7 +221,7 @@
               <form method="post" id="rating_form_Q1">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_{{iid}}_svd_pemcem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_{{iid}}_svd_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -245,7 +251,7 @@
               <form method="post" id="rating_form_Q1">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_{{iid}}_hybrid_pemcem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_{{iid}}_hybrid_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -268,7 +274,7 @@
           <form method="post" id="rating_form_Q2_pemcem">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q2_pemcem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q2_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -276,7 +282,7 @@
           <form method="post" id="rating_form_Q3_pemcem">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q3_pemcem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q3_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -284,7 +290,7 @@
           <form method="post" id="rating_form_Q4_pemcem">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q4_pemcem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q4_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -292,7 +298,7 @@
           <form method="post" id="rating_form_Q5_pemcem">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q5_pemcem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q5_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -304,8 +310,8 @@
 </div>
 {% endif %}
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
-    <form action="/thanks">
-        <button type="submit" id="feedback_exp1" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Submit </button>
+    <form action="/movie_rec/recommendation/re_eval">
+        <button type="submit" id="feedback_exp_top1" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Submit </button>
     </form>
 </div>
 
@@ -313,5 +319,5 @@
 
 {% block javascript %}
 {{ block.super }}
-<script src="{% static 'recsys_demo/js/movie_exp.js' %}"></script>
+<script src="{% static 'recsys_demo/js/movie_exp_top1.js' %}"></script>
 {% endblock javascript %}

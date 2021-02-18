@@ -7,12 +7,13 @@
 {% block title %}Recommendations{% endblock title %}
 {% block content %}
 <div style="max-width: 60%; margin:0 auto;">
-    <h4 class="mb-2 text-info" style="text-align: center;">We provide you with the following movies as recommendations: </h4>
+    <h4 class="mb-2 text-info" style="text-align: center;">We provide you with the following 3 groups (blue, green, orange borders) of movies as recommendations: </h4>
 </div>
 <br>
 
-{% if rec_dict %}
-{% for iid, i_data in rec_dict.items %}
+{% if rec_dicts %}
+<div class="row" style="max-width: 100%; margin: 0 auto;">
+    {% for iid, i_data in rec_dicts.0.items %}
     <div class="card mb-3 border-info" style="width: 35%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
@@ -32,12 +33,61 @@
         </div>
       </div>
     </div>
-{% endfor %}
+    {% endfor %}
+</div>
+<hr class="sep-2" />
+<div class="row" style="max-width: 100%; margin: 0 auto;">
+    {% for iid, i_data in rec_dicts.1.items %}
+    <div class="card mb-3 border-success" style="width: 35%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>
+              <a href="{{  i_data.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>
+<!--              <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>-->
+<!--              <p class="card-text">{{  i_data.overview  }} </p>-->
+              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
+              <p class="card-text">{{  i_data.release_date  }} </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+</div>
+<hr class="sep-2" />
+<div class="row" style="max-width: 100%; margin: 0 auto;">
+    {% for iid, i_data in rec_dicts.2.items %}
+    <div class="card mb-3 border-warning" style="width: 35%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>
+              <a href="{{  i_data.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>
+<!--              <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>-->
+<!--              <p class="card-text">{{  i_data.overview  }} </p>-->
+              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
+              <p class="card-text">{{  i_data.release_date  }} </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+</div>
 {% endif %}
 
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
-    <form action="/movie_rec/recommendation/explanation">
-        <button type="submit" onclick = "toggle('loading_exp')" id="ask_exp" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Ask for explanations of recommendations</button>
+    <form action="/movie_rec/recommendation/explanation_top1_rec">
+        <button type="submit" onclick = "toggle('loading_exp')" id="ask_exp" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Evaluate explanations of top-1 recommendations</button>
     </form>
     <div class="d-flex flex-column align-items-center justify-content-center" id="loading_exp" style="visibility:hidden;">
        <div class="row">

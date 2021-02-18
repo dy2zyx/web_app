@@ -11,6 +11,7 @@ urlpatterns = [
     path('movie_rec', views.movierec_view, name='movie_rec'),
     path('movie_rec/profil', views.profil_view, name='profil'),
     path('movie_rec/recommendation', views.recommendation_view, name='movie_recommendation'),
-    path('movie_rec/recommendation/explanation', views.explanation_view, name='movie_exp'),
+    path('movie_rec/recommendation/explanation_top1_rec', views.top_1_explanation_view, name='movie_exp_top1'),
     path('movie_rec/recommendation/re_eval', views.re_eval_view, name='re_eval'),
+    path('movie_rec/recommendation/explanation', views.explanation_view, name='movie_exp'),
 ]

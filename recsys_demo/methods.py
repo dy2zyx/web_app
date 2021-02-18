@@ -28,7 +28,14 @@ PROPERTIE_LABEL_DICT = {
     'http://dbpedia.org/ontology/producer': 'producer',
     'http://dbpedia.org/ontology/cinematography': 'cinematography',
     'http://dbpedia.org/ontology/editing': 'editing',
-    'http://dbpedia.org/property/starring': 'actor'
+    'http://dbpedia.org/property/starring': 'actor',
+    'http://dbpedia.org/property/musicComposer': 'music composer',
+    'http://dbpedia.org/property/director': 'director',
+    'http://dbpedia.org/property/distributor': 'distributor',
+    'http://dbpedia.org/property/writer': 'writer',
+    'http://dbpedia.org/property/producer': 'producer',
+    'http://dbpedia.org/property/cinematography': 'cinematography',
+    'http://dbpedia.org/property/editing': 'editing',
 }
 
 def init():
@@ -105,10 +112,7 @@ def cbf_predict(input_dict, candidate):
     rating = 0
     for item in input_dict.keys():
         sim_item_candidate = compute_sim(candidate, item)
-        if int(input_dict[item]) > 3:
-            rating += sim_item_candidate
-        else:
-            rating -= sim_item_candidate
+        rating += sim_item_candidate
     return rating / length_profil
 
 
@@ -147,7 +151,7 @@ def svd_recommender(n, input_dict):
     list_ratings = list()
     for iid, r in input_dict.items():
         list_ratings.append((user, iid, str(int(r)*2)))
-    print(list_ratings)
+    # print(list_ratings)
     df = pd.DataFrame(list_ratings, columns =['userID', 'itemID', 'rating'])
     reader = Reader(rating_scale=(0, 10))
     data = Dataset.load_from_df(df=df, reader=reader)
@@ -177,7 +181,7 @@ def hybride_recommender(n, input_dict):
     list_ratings = list()
     for iid, r in input_dict.items():
         list_ratings.append((user, iid, str(int(r)*2)))
-    print(list_ratings)
+    # print(list_ratings)
     df = pd.DataFrame(list_ratings, columns =['userID', 'itemID', 'rating'])
     reader = Reader(rating_scale=(0, 10))
     data = Dataset.load_from_df(df=df, reader=reader)
@@ -258,7 +262,7 @@ def basic_builder(query):
 
 
 def broader_builder(query):
-    print(query)
+    # print(query)
     candidate_properties = defaultdict(set)
     # sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
     sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
@@ -291,11 +295,11 @@ def compute_p_score(p, input_dict, recommended_items, alpha, beta, filter_profil
     sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
     sparql.setQuery(query)
     for result in sparql.query().bindings:
-        nb_i_prof = int(result["nb_i_prof"].value)
-        nb_i_rec = int(result["nb_i_rec"].value)
-        p_freq = int(result["nb_movie"].value)
+        nb_i_prof = float(result["nb_i_prof"].value)
+        nb_i_rec = float(result["nb_i_rec"].value)
+        p_freq = float(result["nb_movie"].value)
 
-    idf_p = 0 if p_freq == 0 else math.log(nb_movie / p_freq)
+    idf_p = 0 if p_freq == 0 else math.log2(nb_movie / p_freq)
     p_score = (alpha * nb_i_prof / i_u + beta * nb_i_rec / i_r) * idf_p
     return p_score
 
@@ -569,6 +573,7 @@ def pem_cem_exp_generator(input_dict, recommended_items):
         pattern = pattern_dict[rec_item]
         explantion = generate_exp_from_pattern(pattern)
         exp_output_dict[rec_item] = explantion
+
     for rec_item in patterns_dict_cem.keys():
         pattern = patterns_dict_cem[rec_item]
         explantion = generate_exp_from_pattern_cem(pattern)

@@ -24,7 +24,6 @@
 <div>
     <form action="/movie_rec"  method="post" id="search_form">
     {%  csrf_token  %}
-<!--        <span style="position:relative; display: inline-block;">-->
         <div class="input-group mb-3" style="width: 45%; margin:0 auto;">
             <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Search among {{nb_movies_in_base}} movies by entering a title" autocomplete="off" spellcheck="false">
                 <span class="input-group-btn">
