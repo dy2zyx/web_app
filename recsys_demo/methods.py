@@ -228,6 +228,8 @@ def generate_queries(input_dict, recommended_items):
          ?i_rec ?p ?o .
          """ + filter_profil + "\n" + filter_rec + """
          filter regex(str(?o), \"http://dbpedia.org/resource\") filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
+         filter (?o != <http://dbpedia.org/resource/Category:English-language_films>)
+         filter (?o != <http://dbpedia.org/resource/Category:American_films>)
         }
         """
 
@@ -308,9 +310,9 @@ def rank_p_basic(candidate_properties, input_dict, recommended_items, alpha, bet
     basic_p_scores = dict()
     for p in candidate_properties:
         p_score = compute_p_score(p, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec)
-
         basic_p_scores[p] = p_score
-    return basic_p_scores
+    ranked_ppt_explod = list({k: v for k, v in sorted(basic_p_scores.items(), key=lambda item: item[1], reverse=True)})
+    return ranked_ppt_explod
 
 
 def rank_p_broader(candidate_properties_broader, basic_p_scores, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec):
@@ -464,8 +466,7 @@ def broader_patterns(top_k_properties, filter_profil, filter_rec):
 def generate_exp_from_pattern(pattern_dict):
     explanation = ""
     if len(pattern_dict.keys()) == 1:
-        explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since'])
-
+        explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since', 'as'])
         ppt = next(iter(pattern_dict))
         po_dict = pattern_dict[ppt]
         ppt = PROPERTIE_LABEL_DICT[ppt] if ppt in PROPERTIE_LABEL_DICT.keys() else ppt
@@ -478,15 +479,15 @@ def generate_exp_from_pattern(pattern_dict):
                 m_titles_exp = ""
                 for m in value:
                     m_titles_exp += "<b>" + movies[uri_iid_dict[m]]['title'] + "</b>" + ", "
-            explanation += " You " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + str(ppt) + " is " + "<i>" + str(key) + "</i>" + " as " + m_titles_exp + ". "
+            explanation += " you " + random.choice(['loves', 'likes', 'prefers']) + movies_exp + " whose " + str(ppt) + " is " + "<i>" + str(key) + "</i>" + " as " + m_titles_exp + "."
         return explanation
     else:
         count = 1
         for ppt in pattern_dict.keys():
             if count == 1:
-                explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since'])
+                explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since', 'as'])
             else:
-                explanation += random.choice(['Furthermore', 'Moreover', 'In addition']) + ", we " + random.choice(['recommend', 'suggest', 'provide']) + " you it " + random.choice(['beacause', 'since'])
+                explanation += random.choice([' Furthermore', ' Moreover', ' In addition']) + ", we " + random.choice(['recommend', 'suggest', 'provide']) + " you it " + random.choice(['beacause', 'since'])
 
             po_dict = pattern_dict[ppt]
             ppt = PROPERTIE_LABEL_DICT[ppt] if ppt in PROPERTIE_LABEL_DICT.keys() else ppt
@@ -499,38 +500,37 @@ def generate_exp_from_pattern(pattern_dict):
                     m_titles_exp = ""
                     for m in value:
                         m_titles_exp += "<b>" + movies[uri_iid_dict[m]]['title'] + "</b>" + ", "
-                explanation += " You " + random.choice(['love', 'like', 'rate']) + movies_exp + " whose " + str(ppt) + " is "+ "<i>" + str(key) + "</i>" + " as " + m_titles_exp + ". "
+                explanation += " you " + random.choice(['loves', 'likes', 'prefers']) + movies_exp + " whose " + str(ppt) + " is " + "<i>" + str(key) + "</i>" + " as " + m_titles_exp + "."
             count += 1
         return explanation
 
 
 def generate_exp_from_pattern_cem(pattern_dict):
     explanation = ""
-    explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since'])
+    explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['because', 'since', 'as'])
 
     for key, value in pattern_dict.items():
         percentage = round(value * 100, 2)
-        if percentage > 0.00:
-            m_title = " <b>" + movies[key]['title'] + "</b> " + ", "
-            explanation += " <b>" + str(percentage) + "%" + "</b> " + "of users interested by " + m_title
-    explanation += " would also likely to like this movie."
+        m_title = " <b>" + movies[key]['title'] + "</b> " + ", "
+        explanation += " <b>" + str(percentage) + "%" + "</b> " + "of users interested by " + m_title
+    explanation += " would also likely to love this movie."
     if "of users interested by" in explanation:
         return explanation
     else:
         return "not possible"
 
 
-def basic_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3):
+def basic_exp_generator(input_dict, recommended_items, alpha=1, beta=0, nb_p=3):
     # generate queries
     filter_profil, filter_rec, query_basic_builder, query_broader_builder = generate_queries(input_dict, recommended_items)
     # filter properties to get overlap ones
     candidate_properties = basic_builder(query_basic_builder)
     # scoring these properties
-    basic_p_scores = rank_p_basic(candidate_properties, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec)
+    ranked_ppt_explod = rank_p_basic(candidate_properties, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec)
     # extract the top-k properties
-    top_properties = list({k: v for k, v in sorted(basic_p_scores.items(), key=lambda item: item[1], reverse=True)})[:k]
+    top_k_properties = ranked_ppt_explod[:nb_p]
     # generate patterns for explanation
-    patterns_dict = basic_patterns(top_properties, filter_profil, filter_rec)
+    patterns_dict = basic_patterns(top_k_properties, filter_profil, filter_rec)
     # for each recommended movie, generate explanations
     exp_output_dict = dict()
     for rec_item in patterns_dict.keys():
@@ -567,16 +567,16 @@ def broader_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=
 def pem_cem_exp_generator(input_dict, recommended_items):
     exp_kge = ExpKGE(recommended_items=recommended_items, input_dict=input_dict)
     pattern_dict, patterns_dict_cem = exp_kge.exp_generator()
-    exp_output_dict = dict()
+    exp_output_dict_pem, exp_output_dict_cem = dict(), dict()
 
     for rec_item in pattern_dict.keys():
         pattern = pattern_dict[rec_item]
         explantion = generate_exp_from_pattern(pattern)
-        exp_output_dict[rec_item] = explantion
+        exp_output_dict_pem[rec_item] = explantion
 
     for rec_item in patterns_dict_cem.keys():
         pattern = patterns_dict_cem[rec_item]
         explantion = generate_exp_from_pattern_cem(pattern)
         if not explantion == "not possible":
-            exp_output_dict[rec_item] = explantion
-    return exp_output_dict
+            exp_output_dict_cem[rec_item] = explantion
+    return exp_output_dict_pem, exp_output_dict_cem

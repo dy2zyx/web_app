@@ -15,8 +15,8 @@
       <h4 class="alert-heading">How to...</h4>
       <p class="mb-0">In this section we provide you with more information about each movie, we ask you to:</p>
         <ul>
-            <li>1. If you'd like to, click the link of each recommended movie, which will provide you with more information about it, such as the genre, the actors, the director etc.</li>
-            <li>2. Rate again each recommended item (change mind after knowing more details about the movie?)</li>
+            <li>1. If needed/you'd like to, you could click the link of each recommended movie, which will provide you with more information about it, such as the genre, the actors, the director etc.</li>
+            <li>2. Rate again each recommended movie (i.e. will you change your rating after knowing more details about the movie?)</li>
         </ul>
     </div>
 </div>
@@ -24,12 +24,13 @@
 
 {% if recomm_dicts %}
 <div class="row">
+
 <div class="col">
 <div class="alert alert-success">
-    <h5 class="alert-heading">Explanation Style 1</h5>
+    <h5 class="alert-heading">For Explanation Style 1</h5>
 </div>
 {% for iid, i_data in recomm_dicts.0.items %}
-    <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
+    <div class="card mb-3 border-info" style="width: 100%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <img src="{{ i_data.poster_path }}" class="card-img">
@@ -55,7 +56,7 @@
 {% endfor %}
 <hr class="sep-2" />
 {% for iid, i_data in recomm_dicts.1.items %}
-    <div class="card mb-3 border-success" style="width: 60%; margin:0 auto;">
+    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <img src="{{ i_data.poster_path }}" class="card-img">
@@ -81,7 +82,7 @@
 {% endfor %}
 <hr class="sep-2" />
 {% for iid, i_data in recomm_dicts.2.items %}
-    <div class="card mb-3 border-warning" style="width: 60%; margin:0 auto;">
+    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <img src="{{ i_data.poster_path }}" class="card-img">
@@ -106,12 +107,13 @@
     </div>
 {% endfor %}
 </div>
+
 <div class="col">
 <div class="alert alert-success">
-    <h5 class="alert-heading">Explanation Style 2</h5>
+    <h5 class="alert-heading">For Explanation Style 2</h5>
 </div>
 {% for iid, i_data in recomm_dicts.0.items %}
-    <div class="card mb-3 border-info" style="width: 60%; margin:0 auto;">
+    <div class="card mb-3 border-info" style="width: 100%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <img src="{{ i_data.poster_path }}" class="card-img">
@@ -127,7 +129,7 @@
               <form method="post" id="rating_form_Q1_2">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_2_{{iid}}_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_2_{{iid}}_pem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -137,7 +139,7 @@
 {% endfor %}
 <hr class="sep-2" />
 {% for iid, i_data in recomm_dicts.1.items %}
-    <div class="card mb-3 border-success" style="width: 60%; margin:0 auto;">
+    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <img src="{{ i_data.poster_path }}" class="card-img">
@@ -153,7 +155,7 @@
               <form method="post" id="rating_form_Q1_2">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_2_{{iid}}_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_2_{{iid}}_pem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -163,7 +165,7 @@
 {% endfor %}
 <hr class="sep-2" />
 {% for iid, i_data in recomm_dicts.2.items %}
-    <div class="card mb-3 border-warning" style="width: 60%; margin:0 auto;">
+    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <img src="{{ i_data.poster_path }}" class="card-img">
@@ -179,7 +181,7 @@
               <form method="post" id="rating_form_Q1_2">
                   {% csrf_token %}
                   <div class="pt-3">
-                      <input id="Q1_2_{{iid}}_pemcem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                      <input id="Q1_2_{{iid}}_pem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
                   </div>
               </form>
           </div>
@@ -188,6 +190,90 @@
     </div>
 {% endfor %}
 </div>
+
+<div class="col">
+<div class="alert alert-success">
+    <h5 class="alert-heading">For Explanation Style 3</h5>
+</div>
+{% for iid, i_data in recomm_dicts.0.items %}
+    <div class="card mb-3 border-info" style="width: 100%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}_cem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+<hr class="sep-2" />
+{% for iid, i_data in recomm_dicts.1.items %}
+    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}_cem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+<hr class="sep-2" />
+{% for iid, i_data in recomm_dicts.2.items %}
+    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Movie details</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text" target="_blank"> Click here for details of the movie</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Rate the recommendation again</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}_cem" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+</div>
+
 </div>
 {% endif %}
 

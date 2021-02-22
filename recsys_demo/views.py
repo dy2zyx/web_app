@@ -156,7 +156,7 @@ def profil_view(request):
         print(request.session['user_inputs_ratings'])
         return render(request, template_name=template_name, context={'data_dict': data_dict, 'nb_item': len(data_dict.keys())})
 
-
+@cache_page(60 * 15)
 def recommendation_view(request):
     template_name = 'recsys_demo/recommendation.html'
 
@@ -221,8 +221,8 @@ def top_1_explanation_view(request):
     for recommendation_approach in recommendation_approaches:
         input_dict = request.session['user_inputs_ratings']
         recommended_items = request.session[recommendation_approach][:1]
-        exp_output_dict_explod = basic_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3)
-        exp_output_dict_pemcem = pem_cem_exp_generator(input_dict, recommended_items)
+        exp_output_dict_explod = basic_exp_generator(input_dict, recommended_items, alpha=1, beta=0, nb_p=3)
+        exp_output_dict_pem, exp_output_dict_cem = pem_cem_exp_generator(input_dict, recommended_items)
 
         rec_dict = dict(dict())
         for iid, predicted_r in recommended_items:
@@ -236,12 +236,19 @@ def top_1_explanation_view(request):
                     explanation_explod = "Hops, it seems that it is failed to generate explanation for this item."
                     exp_dict['explod'] = (movie_info, explanation_explod)
 
-                if iid in exp_output_dict_pemcem.keys():
-                    explanation_pemcem = exp_output_dict_pemcem[iid]
-                    exp_dict['pemcem'] = (movie_info, explanation_pemcem)
+                if iid in exp_output_dict_pem.keys():
+                    explanation_pem = exp_output_dict_pem[iid]
+                    exp_dict['pem'] = (movie_info, explanation_pem)
                 else:
-                    explanation_pemcem = "Hops, it seems that it is failed to generate explanation for this item."
-                    exp_dict['pemcem'] = (movie_info, explanation_pemcem)
+                    explanation_pem = "Hops, it seems that it is failed to generate explanation for this item."
+                    exp_dict['pem'] = (movie_info, explanation_pem)
+
+                if iid in exp_output_dict_cem.keys():
+                    explanation_cem = exp_output_dict_cem[iid]
+                    exp_dict['cem'] = (movie_info, explanation_cem)
+                else:
+                    explanation_cem = "Hops, it seems that it is failed to generate explanation for this item."
+                    exp_dict['cem'] = (movie_info, explanation_cem)
                 rec_dict[iid] = exp_dict
         rec_dicts.append(rec_dict)
     return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
@@ -299,8 +306,8 @@ def explanation_view(request):
     for recommendation_approach in recommendation_approaches:
         input_dict = request.session['user_inputs_ratings']
         recommended_items = request.session[recommendation_approach]
-        exp_output_dict_explod = basic_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3)
-        exp_output_dict_pemcem = pem_cem_exp_generator(input_dict, recommended_items)
+        exp_output_dict_explod = basic_exp_generator(input_dict, recommended_items, alpha=1, beta=0, nb_p=3)
+        exp_output_dict_pem, exp_output_dict_cem = pem_cem_exp_generator(input_dict, recommended_items)
 
         rec_dict = dict(dict())
         for iid, predicted_r in recommended_items:
@@ -314,12 +321,19 @@ def explanation_view(request):
                     explanation_explod = "Hops, it seems that it is failed to generate explanation for this item."
                     exp_dict['explod'] = (movie_info, explanation_explod)
 
-                if iid in exp_output_dict_pemcem.keys():
-                    explanation_pemcem = exp_output_dict_pemcem[iid]
-                    exp_dict['pemcem'] = (movie_info, explanation_pemcem)
+                if iid in exp_output_dict_pem.keys():
+                    explanation_pem = exp_output_dict_pem[iid]
+                    exp_dict['pem'] = (movie_info, explanation_pem)
                 else:
-                    explanation_pemcem = "Hops, it seems that it is failed to generate explanation for this item."
-                    exp_dict['pemcem'] = (movie_info, explanation_pemcem)
+                    explanation_pem = "Hops, it seems that it is failed to generate explanation for this item."
+                    exp_dict['pem'] = (movie_info, explanation_pem)
+
+                if iid in exp_output_dict_cem.keys():
+                    explanation_cem = exp_output_dict_cem[iid]
+                    exp_dict['cem'] = (movie_info, explanation_cem)
+                else:
+                    explanation_cem = "Hops, it seems that it is failed to generate explanation for this item."
+                    exp_dict['cem'] = (movie_info, explanation_cem)
                 rec_dict[iid] = exp_dict
         rec_dicts.append(rec_dict)
     return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
