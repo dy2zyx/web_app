@@ -7,7 +7,7 @@ from django.views import generic
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from .methods import parse_movie_metadata, movies, iid_uri_dict, init, cbf_recommender, svd_recommender, hybride_recommender, basic_exp_generator, broader_exp_generator, pem_cem_exp_generator
+from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, hybride_recommender, broader_exp_generator, exp_generator
 from .forms import MovieTitleForm
 from collections import defaultdict
 from django.views.generic import CreateView
@@ -156,7 +156,7 @@ def profil_view(request):
         print(request.session['user_inputs_ratings'])
         return render(request, template_name=template_name, context={'data_dict': data_dict, 'nb_item': len(data_dict.keys())})
 
-@cache_page(60 * 15)
+# @cache_page(60 * 15)
 def recommendation_view(request):
     template_name = 'recsys_demo/recommendation.html'
 
@@ -198,7 +198,7 @@ def recommendation_view(request):
                 rec_dicts.append(rec_dict)
         return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
 
-@cache_page(60 * 15)
+# @cache_page(60 * 15)
 def top_1_explanation_view(request):
     template_name = 'recsys_demo/exp_for_top_1_recommendation.html'
 
@@ -221,8 +221,7 @@ def top_1_explanation_view(request):
     for recommendation_approach in recommendation_approaches:
         input_dict = request.session['user_inputs_ratings']
         recommended_items = request.session[recommendation_approach][:1]
-        exp_output_dict_explod = basic_exp_generator(input_dict, recommended_items, alpha=1, beta=0, nb_p=3)
-        exp_output_dict_pem, exp_output_dict_cem = pem_cem_exp_generator(input_dict, recommended_items)
+        exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = exp_generator(input_dict, recommended_items)
 
         rec_dict = dict(dict())
         for iid, predicted_r in recommended_items:
@@ -253,7 +252,7 @@ def top_1_explanation_view(request):
         rec_dicts.append(rec_dict)
     return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
 
-@cache_page(60 * 15)
+# @cache_page(60 * 15)
 def re_eval_view(request):
     template_name = 'recsys_demo/re_eval.html'
     current_user_id = request.session['current_user_metadata']['user_id']
@@ -306,8 +305,7 @@ def explanation_view(request):
     for recommendation_approach in recommendation_approaches:
         input_dict = request.session['user_inputs_ratings']
         recommended_items = request.session[recommendation_approach]
-        exp_output_dict_explod = basic_exp_generator(input_dict, recommended_items, alpha=1, beta=0, nb_p=3)
-        exp_output_dict_pem, exp_output_dict_cem = pem_cem_exp_generator(input_dict, recommended_items)
+        exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = exp_generator(input_dict, recommended_items)
 
         rec_dict = dict(dict())
         for iid, predicted_r in recommended_items:

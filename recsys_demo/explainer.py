@@ -13,7 +13,7 @@ from collections import defaultdict
 from SPARQLWrapper import SPARQLWrapper2, SPARQLWrapper, JSON
 
 
-class ExpKGE:
+class Explainer:
     """
     The proposed KG embedding based approach.
     The parameters:
@@ -22,10 +22,8 @@ class ExpKGE:
         nb_rec: number of top-N items recommended for user
         input_dict: user input representing rating dict {'iid': 'rating'}
     """
-    def __init__(self, recommended_items=None, nb_po=3, input_dict=None, alpha=1, beta=0):
-        # self.recommender = recommender
+    def __init__(self, recommended_items=None, nb_po=3, input_dict=None, alpha=0.5, beta=0.5):
         self.nb_po = nb_po
-        # self.nb_rec = nb_rec
         self.input_dict = input_dict
         self.alpha = alpha
         self.beta = beta
@@ -198,15 +196,21 @@ class ExpKGE:
         filter_rec += ")"
 
         query_basic_builder = """
-            select distinct ?p ?o
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            select distinct ?i_prof ?p ?o ?label_o ?i_rec
             where {
-             ?i_prof ?p ?o .
-             ?i_rec ?p ?o .
-             """ + filter_profil + "\n" + filter_rec + """
-             filter regex(str(?o), \"http://dbpedia.org/resource\") filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
-             filter (?o != <http://dbpedia.org/resource/Category:English-language_films>)
-             filter (?o != <http://dbpedia.org/resource/Category:American_films>)
-            }
+                ?i_prof ?p ?o .
+                ?i_rec ?p ?o . 
+                ?o rdfs:label ?label_o . 
+                """ + filter_profil + "\n" + filter_rec + """
+                filter (lang(?label_o) = 'en')
+                filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
+                filter (?p != <http://dbpedia.org/property/wikiPageUsesTemplate>)
+                filter (?o != <http://dbpedia.org/resource/Category:English-language_films>)
+                filter (?o != <http://dbpedia.org/resource/Category:American_films>)
+                filter regex(str(?o), "http://dbpedia.org/resource") 
+                filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
+                }
             """
 
         query_broader_builder = """
@@ -231,10 +235,12 @@ class ExpKGE:
         sparql.setQuery(query)
         sparql.setReturnFormat(JSON)
         for result in sparql.query().convert()["results"]["bindings"]:
+            i_prof = result["i_prof"]["value"]
+            i_rec = result["i_rec"]["value"]
+            o_label = result["label_o"]["value"]
             p = result["p"]["value"]
             o = result["o"]["value"]
-            candidate_properties.append((p, o))
-        # print(candidate_properties)
+            candidate_properties.append((p, o, o_label, i_prof, i_rec))
         return candidate_properties
 
     def compute_p_score(self, p, filter_profil, filter_rec):
@@ -269,18 +275,26 @@ class ExpKGE:
         for p in candidate_properties:
             p_score = self.compute_p_score(p[1], filter_profil, filter_rec)
             basic_p_scores[p] = p_score
-        ranked_ppts = list({k: v for k, v in sorted(basic_p_scores.items(), key=lambda item: item[1], reverse=True)}.items())
-        norm_ranked_ppts = self.normalise_p_score(ranked_ppts)
-        rerank_objetppt = self.rerank_objetppts(norm_ranked_ppts)
-        return rerank_objetppt
+
+        obj_ppt_rankedby_explod = list({k: v for k, v in sorted(basic_p_scores.items(), key=lambda item: item[1], reverse=True)}.items())
+        if len(obj_ppt_rankedby_explod) == 0:
+            reranked_obj_ppt = list()
+            return obj_ppt_rankedby_explod, reranked_obj_ppt
+        else:
+            norm_ranked_ppts = self.normalise_p_score(obj_ppt_rankedby_explod)
+            reranked_obj_ppt = self.rerank_objetppts(norm_ranked_ppts)
+            return obj_ppt_rankedby_explod, reranked_obj_ppt
 
     def normalise_p_score(self, ranked_ppt):
         result_list = list()
         max_score = ranked_ppt[0][1]
         min_score = ranked_ppt[-1][1]
         score_range = max_score - min_score
-        for (ppt, objetppt), score in ranked_ppt:
-            result_list.append(((ppt, objetppt), (score - min_score) / score_range))
+        for _, score in ranked_ppt:
+            if score_range == 0:
+                result_list.append((_, 1))
+            else:
+                result_list.append((_, (score - min_score) / score_range))
         return result_list
 
     def rerank_objetppts(self, norm_ranked_objetppt_explod):
@@ -295,90 +309,140 @@ class ExpKGE:
         reranked_ppt.sort(key=lambda item: item[1], reverse=True)
         return reranked_ppt
 
-    def basic_patterns(self, all_properties):
-        patterns_dict = dict()
+    def generate_patterns(self, all_properties_explod, all_properties_pem):
+        patterns_dict_explod = dict()
+        patterns_dict_pem = dict()
         patterns_dict_cem = dict()
-        for i_rec, pred in self.recommended_items:
-            patterns_dict_cem[i_rec] = self.cf_exp_generator(i_rec)
-            # similar_items = self.get_similar_items(i_rec)
-            if len(all_properties) > 0:
-                filter_all_p = "filter ("
-                for item in all_properties:
-                    item = "<" + item[0][1] + ">"
-                    filter_all_p += "?o = " + item + " || "
-                filter_all_p = filter_all_p[:-3]
-                filter_all_p += ")"
 
-                # items_profil = [self.iid_uri_dict[iid] for iid in similar_items]
-                items_profil = [self.iid_uri_dict[iid] for iid in self.input_dict.keys()]
-                filter_profil = "filter ("
-                for item in items_profil:
-                    item = "<" + item + ">"
-                    filter_profil += "?i_prof = " + item + " || "
-                filter_profil = filter_profil[:-3]
-                filter_profil += ")"
-
-                filter_rec = "filter (?i_rec = <" + self.iid_uri_dict[i_rec] + ">)"
-
-                query = """
-                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                    select distinct ?i_prof ?p ?o ?label_o ?i_rec
-                    where {
-                        ?i_prof ?p ?o .
-                        ?i_rec ?p ?o . """ + "\n" + filter_profil + "\n" + filter_rec + "\n" + filter_all_p + """\n
-                        ?o rdfs:label ?label_o .
-                        filter (lang(?label_o) = 'en')
-                        filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
-                        }
-                """
-    #             print(query)
-                sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-                sparql.setQuery(query)
-                commun_ppt = set()
+        # generate explanation pattern for explod
+        for (p, o, o_label, i_prof, i_rec), score in all_properties_explod[:self.nb_po]:
+            if i_rec not in patterns_dict_explod.keys():
                 predicate_dict = dict()
-                for result in sparql.query().bindings:
-                    i_prof = result["i_prof"].value
-                    p = result["p"].value
-                    o = result["o"].value
-                    o_label = result["label_o"].value
-                    i_rec_label = result["i_rec"].value
-                    commun_ppt.add(o)
+                if p not in predicate_dict.keys():
+                    po_dict = defaultdict(list)
+                    po_dict[o_label].append(i_prof)
+                    predicate_dict[p] = po_dict
+                    patterns_dict_explod[i_rec] = predicate_dict
+                else:
+                    predicate_dict[p][o_label].append(i_prof)
+                    patterns_dict_explod[i_rec] = predicate_dict
+            else:
+                predicate_dict = patterns_dict_explod[i_rec]
+                if p not in predicate_dict.keys():
+                    po_dict = defaultdict(list)
+                    po_dict[o_label].append(i_prof)
+                    predicate_dict[p] = po_dict
+                    patterns_dict_explod[i_rec] = predicate_dict
+                else:
+                    predicate_dict[p][o_label].append(i_prof)
+                    patterns_dict_explod[i_rec] = predicate_dict
+
+         # generate explanation pattern for pem
+        if len(all_properties_pem) > 0:
+            i_rec_ppt_dict = defaultdict(list)
+            for (p, o, o_label, i_prof, i_rec), score in all_properties_pem:
+                i_rec_ppt_dict[i_rec].append((p, o, o_label, i_prof))
+
+            for i_rec in i_rec_ppt_dict.keys():
+                predicate_dict = dict()
+                for p, o, o_label, i_prof in i_rec_ppt_dict[i_rec][:self.nb_po]:
                     if p not in predicate_dict.keys():
                         po_dict = defaultdict(list)
-                        po_dict[(o, o_label)].append(i_prof)
+                        po_dict[o_label].append(i_prof)
                         predicate_dict[p] = po_dict
                     else:
-                        predicate_dict[p][(o, o_label)].append(i_prof)
-                top_k_ppt = [ppty[0][1] for ppty in all_properties if ppty[0][1] in commun_ppt][:self.nb_po]
+                        predicate_dict[p][o_label].append(i_prof)
+                patterns_dict_pem[i_rec] = predicate_dict
 
-                for predicate in predicate_dict.keys():
-                    value_dict = predicate_dict[predicate]
-                    for po_key in list(value_dict.keys()):
-                        if not po_key[0] in top_k_ppt:
-                            del value_dict[po_key]
+         # generate explanation pattern for cem
+        for i_rec, pred in self.recommended_items:
+            patterns_dict_cem[i_rec] = self.cf_exp_generator(i_rec)
 
-                for predicate in list(predicate_dict.keys()):
-                    value_dict = predicate_dict[predicate]
-                    if not value_dict:
-                        del predicate_dict[predicate]
+        return patterns_dict_explod, patterns_dict_pem, patterns_dict_cem
 
-                predicate_dict_new = dict()
-                for po in top_k_ppt:
-                    for ppt, ppt_values in predicate_dict.items():
-                        ppt = ppt.replace('http://dbpedia.org/property/', 'http://dbpedia.org/ontology/') if 'http://dbpedia.org/property/' in ppt else ppt
-                        for key, value in ppt_values.items():
-                            if key[0] == po:
-                                if ppt not in predicate_dict_new.keys():
-                                    po_dict = defaultdict(list)
-                                    po_dict[key] = value
-                                    predicate_dict_new[ppt] = po_dict
-                                else:
-                                    predicate_dict_new[ppt][key] = value
-
-                patterns_dict[i_rec] = predicate_dict_new
-
-        return patterns_dict, patterns_dict_cem
-
+    # def basic_patterns(self, all_properties):
+    #     patterns_dict = dict()
+    #     patterns_dict_cem = dict()
+    #     for i_rec, pred in self.recommended_items:
+    #         patterns_dict_cem[i_rec] = self.cf_exp_generator(i_rec)
+    #         # similar_items = self.get_similar_items(i_rec)
+    #         if len(all_properties) > 0:
+    #             filter_all_p = "filter ("
+    #             for item in all_properties:
+    #                 item = "<" + item[0][1] + ">"
+    #                 filter_all_p += "?o = " + item + " || "
+    #             filter_all_p = filter_all_p[:-3]
+    #             filter_all_p += ")"
+    #
+    #             # items_profil = [self.iid_uri_dict[iid] for iid in similar_items]
+    #             items_profil = [self.iid_uri_dict[iid] for iid in self.input_dict.keys()]
+    #             filter_profil = "filter ("
+    #             for item in items_profil:
+    #                 item = "<" + item + ">"
+    #                 filter_profil += "?i_prof = " + item + " || "
+    #             filter_profil = filter_profil[:-3]
+    #             filter_profil += ")"
+    #
+    #             filter_rec = "filter (?i_rec = <" + self.iid_uri_dict[i_rec] + ">)"
+    #
+    #             query = """
+    #                 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    #                 select distinct ?i_prof ?p ?o ?label_o ?i_rec
+    #                 where {
+    #                     ?i_prof ?p ?o .
+    #                     ?i_rec ?p ?o . """ + "\n" + filter_profil + "\n" + filter_rec + "\n" + filter_all_p + """\n
+    #                     ?o rdfs:label ?label_o .
+    #                     filter (lang(?label_o) = 'en')
+    #                     filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
+    #                     }
+    #             """
+    # #             print(query)
+    #             sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
+    #             sparql.setQuery(query)
+    #             commun_ppt = set()
+    #             predicate_dict = dict()
+    #             for result in sparql.query().bindings:
+    #                 i_prof = result["i_prof"].value
+    #                 p = result["p"].value
+    #                 o = result["o"].value
+    #                 o_label = result["label_o"].value
+    #                 i_rec_label = result["i_rec"].value
+    #                 commun_ppt.add(o)
+    #                 if p not in predicate_dict.keys():
+    #                     po_dict = defaultdict(list)
+    #                     po_dict[(o, o_label)].append(i_prof)
+    #                     predicate_dict[p] = po_dict
+    #                 else:
+    #                     predicate_dict[p][(o, o_label)].append(i_prof)
+    #             top_k_ppt = [ppty[0][1] for ppty in all_properties if ppty[0][1] in commun_ppt][:self.nb_po]
+    #
+    #             for predicate in predicate_dict.keys():
+    #                 value_dict = predicate_dict[predicate]
+    #                 for po_key in list(value_dict.keys()):
+    #                     if not po_key[0] in top_k_ppt:
+    #                         del value_dict[po_key]
+    #
+    #             for predicate in list(predicate_dict.keys()):
+    #                 value_dict = predicate_dict[predicate]
+    #                 if not value_dict:
+    #                     del predicate_dict[predicate]
+    #
+    #             predicate_dict_new = dict()
+    #             for po in top_k_ppt:
+    #                 for ppt, ppt_values in predicate_dict.items():
+    #                     ppt = ppt.replace('http://dbpedia.org/property/', 'http://dbpedia.org/ontology/') if 'http://dbpedia.org/property/' in ppt else ppt
+    #                     for key, value in ppt_values.items():
+    #                         if key[0] == po:
+    #                             if ppt not in predicate_dict_new.keys():
+    #                                 po_dict = defaultdict(list)
+    #                                 po_dict[key] = value
+    #                                 predicate_dict_new[ppt] = po_dict
+    #                             else:
+    #                                 predicate_dict_new[ppt][key] = value
+    #
+    #             patterns_dict[i_rec] = predicate_dict_new
+    #
+    #     return patterns_dict, patterns_dict_cem
 
     def exp_generator(self):
         # generate queries
@@ -386,23 +450,16 @@ class ExpKGE:
         # filter properties to get overlap ones
         candidate_properties = self.basic_builder(query_basic_builder)
         # scoring these properties
-        ranked_ppts = self.rank_p_basic(candidate_properties,  filter_profil, filter_rec)
+        ranked_objetppt_explod, ranked_objetppt_pem = self.rank_p_basic(candidate_properties,  filter_profil, filter_rec)
         # extract the top-k properties
-        all_properties = ranked_ppts[:80]
+        # all_properties = ranked_ppts[:80]
         # generate patterns for explanation
 
-        patterns_dict, patterns_dict_cem = self.basic_patterns(all_properties)
+        patterns_dict_explod = self.generate_patterns(ranked_objetppt_explod, ranked_objetppt_pem)[0]
+        patterns_dict_pem = self.generate_patterns(ranked_objetppt_explod, ranked_objetppt_pem)[1]
+        patterns_dict_cem = self.generate_patterns(ranked_objetppt_explod, ranked_objetppt_pem)[2]
 
-        return patterns_dict, patterns_dict_cem
-
-    # def get_similar_items(self, i_r):
-    #     similar_items = list()
-    #     cluster_ir = self.item_cluster_dict[i_r]
-    #     for i_u, rating in self.input_dict.items():
-    #         cluster_iu = self.item_cluster_dict[i_u]
-    #         if cluster_ir == cluster_iu:
-    #             similar_items.append(i_u)
-    #     return similar_items
+        return patterns_dict_explod, patterns_dict_pem, patterns_dict_cem
 
     def cf_exp_generator(self, i_rec):
         d = dict()

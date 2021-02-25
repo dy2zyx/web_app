@@ -12,7 +12,7 @@ from scipy.spatial.distance import cosine
 from surprise import SVD, Reader, Dataset
 from SPARQLWrapper import SPARQLWrapper2, SPARQLWrapper, JSON
 from collections import defaultdict
-from recsys_demo.explainer import ExpKGE
+from recsys_demo.explainer import Explainer
 
 movies = dict()
 iid_uri_dict = dict()
@@ -465,7 +465,11 @@ def broader_patterns(top_k_properties, filter_profil, filter_rec):
 
 def generate_exp_from_pattern(pattern_dict):
     explanation = ""
-    if len(pattern_dict.keys()) == 1:
+    if len(pattern_dict.keys()) == 0:
+        explanation = 'Hops, it seems that it is failed to generate explanation for this item.'
+        return explanation
+
+    elif len(pattern_dict.keys()) == 1:
         explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since', 'as'])
         ppt = next(iter(pattern_dict))
         po_dict = pattern_dict[ppt]
@@ -565,7 +569,7 @@ def broader_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=
 
 
 def pem_cem_exp_generator(input_dict, recommended_items):
-    exp_kge = ExpKGE(recommended_items=recommended_items, input_dict=input_dict)
+    exp_kge = Explainer(recommended_items=recommended_items, input_dict=input_dict)
     pattern_dict, patterns_dict_cem = exp_kge.exp_generator()
     exp_output_dict_pem, exp_output_dict_cem = dict(), dict()
 
@@ -580,3 +584,26 @@ def pem_cem_exp_generator(input_dict, recommended_items):
         if not explantion == "not possible":
             exp_output_dict_cem[rec_item] = explantion
     return exp_output_dict_pem, exp_output_dict_cem
+
+
+def exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3):
+    explainer = Explainer(recommended_items=recommended_items, input_dict=input_dict)
+    pattern_dict_explod, pattern_dict_pem, patterns_dict_cem = explainer.exp_generator()
+    exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = dict(), dict(), dict()
+
+    for rec_item in pattern_dict_explod.keys():
+        pattern = pattern_dict_explod[rec_item]
+        explantion = generate_exp_from_pattern(pattern)
+        exp_output_dict_explod[uri_iid_dict[rec_item]] = explantion
+
+    for rec_item in pattern_dict_pem.keys():
+        pattern = pattern_dict_pem[rec_item]
+        explantion = generate_exp_from_pattern(pattern)
+        exp_output_dict_pem[uri_iid_dict[rec_item]] = explantion
+
+    for rec_item in patterns_dict_cem.keys():
+        pattern = patterns_dict_cem[rec_item]
+        explantion = generate_exp_from_pattern_cem(pattern)
+        if not explantion == "not possible":
+            exp_output_dict_cem[rec_item] = explantion
+    return exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem
