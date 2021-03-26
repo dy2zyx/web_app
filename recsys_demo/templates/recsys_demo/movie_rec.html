@@ -9,7 +9,7 @@
 {% block title %}Movie recommendations{% endblock title %}
 
 {% block content %}
-<div style="width: 45%; margin:0 auto;">
+<div style="width: 65%; margin:0 auto;">
     <div class="alert alert-success">
       <h4 class="alert-heading">How to...</h4>
       <p class="mb-0">Please select at least 5 movies that you like. You can either:</p>
@@ -24,7 +24,7 @@
 <div>
     <form action="/movie_rec"  method="post" id="search_form">
     {%  csrf_token  %}
-        <div class="input-group mb-3" style="width: 45%; margin:0 auto;">
+        <div class="input-group mb-3" style="width: 65%; margin:0 auto;">
             <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Search among {{nb_movies_in_base}} movies by entering a title" autocomplete="off" spellcheck="false">
                 <span class="input-group-btn">
                     <button id="search_btn" type="submit" class="btn btn-outline-secondary">
@@ -42,10 +42,10 @@
 <!--    {% endif %}-->
 
     {% if movie_info %}
-    <div style="width: 45%; margin:0 auto;">
+    <div style="width: 65%; margin:0 auto;">
         <h4 class="mb-2 text-info">User searched movie</h4>
     </div>
-    <div class="card mb-3 border-info" style="width: 45%; margin:0 auto;">
+    <div class="card mb-3 border-info" style="width: 65%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <img src="{{ movie_info.poster_path }}" class="card-img">
@@ -79,11 +79,11 @@
 
     {% endif %}
     {% if random_movies_dict %}
-    <div style="width: 45%; margin:0 auto;">
+    <div style="width: 65%; margin:0 auto;">
         <h4 class="mb-2 text-info">Showing randomly displayed movies</h4>
     </div>
     {% for iid, i_data in random_movies_dict.items %}
-        <div class="card mb-3 border-info" style="width: 45%; margin:0 auto;">
+        <div class="card mb-3 border-info" style="width: 65%; margin:0 auto;">
           <div class="row no-gutters">
             <div class="col-md-4">
               <img src="{{ i_data.0.poster_path }}" class="card-img">
@@ -120,9 +120,9 @@
 
     <form action="/movie_rec/profil" method="post">
       {% csrf_token %}
-      <div class="input-group-append" style="width: 45%; margin:0 auto;">
-        <button id="finish_rating" type="submit" class="btn btn-success">
-            <i class="fa fa-check fa-lg"></i> Finish rating
+      <div class="input-group-append" style="width: 65%; margin:0 auto;">
+        <button id="finish_rating" type="submit" class="btn btn-success" style="max-width: 100%; margin: 0 auto;">
+            <i class="fa fa-arrow-circle-right fa-lg"></i> Finish rating
         </button>
       </div>
     </form>
@@ -153,7 +153,8 @@
         },
         {
             name: 'movie_titles',
-            source: movie_titles
+            source: movie_titles,
+            limit: 10
         });
     });
 

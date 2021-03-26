@@ -1,5 +1,5 @@
-FROM python:3.7-slim as production
-
+#FROM python:3.7-slim as production
+FROM python:3.7-slim
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app/
 
@@ -19,9 +19,9 @@ RUN pip install -r ./requirements/prod.txt
 
 EXPOSE 8000
 
-FROM production as developement
-
-COPY requirements/dev.txt ./requirements/dev.txt
-RUN pip install -r ./requirements/dev.txt
-
-COPY . .
+#FROM production as developement
+#
+#COPY requirements/dev.txt ./requirements/dev.txt
+#RUN pip install -r ./requirements/dev.txt
+#
+#COPY . .

@@ -7,7 +7,7 @@ from django.views import generic
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, hybride_recommender, broader_exp_generator, exp_generator
+from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, hybride_recommender, exp_generator
 from .forms import MovieTitleForm
 from collections import defaultdict
 from django.views.generic import CreateView
@@ -16,7 +16,6 @@ from django.views.decorators.cache import cache_page
 from django.conf import settings
 from .models import UserInfo
 
-# Views
 
 user_inputs_ratings = dict()
 user_inputs = list()
@@ -27,7 +26,7 @@ random_movie_ids = random.sample(movies.keys(), k=10)
 random_movies_dict = dict()
 random_movie_id_dict = dict()
 compteur = 0
-_NB_REC = 2
+_NB_REC = 3
 
 for m_id in random_movie_ids:
     random_movies_dict[m_id] = (movies[m_id], compteur)
@@ -50,6 +49,7 @@ class UserLoginView(CreateView):
                    'user_last_name': self.object.last_name,
                    'user_id': self.object.id}
         self.request.session['current_user_metadata'] = context
+
         # print(self.request.session.keys())
         # print(self.object.first_name)
         return HttpResponseRedirect('index')
@@ -100,7 +100,7 @@ def movierec_view(request):
         else:
             print(form.errors.as_data())
             return render(request, template_name, {'form': form, 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
-    return render(request, template_name=template_name, context={'nb_movies_in_base': len(movies.keys()), 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
+    return render(request, template_name=template_name, context={'nb_movies_in_base': "{:,}".format(len(movies.keys())), 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
 
 
 def profil_view(request):
@@ -111,33 +111,7 @@ def profil_view(request):
         print(removed_movie_id)
         del request.session['user_inputs_ratings'][str(removed_movie_id)]
         request.session.modified = True
-        # response = HttpResponse(removed_movie_id, content_type="text/html")
-        # return response
-        # if not 'user_inputs_ratings' in request.session.keys():
-        #     return render(request, template_name=template_name, context={'nb_item': 0})
-        # else:
-        #     data_dict = dict()
-        #     print(request.session['user_inputs_ratings'])
-        #     for iid in request.session['user_inputs_ratings'].keys():
-        #         if iid in movies.keys():
-        #             movie_info = movies[iid]
-        #             movie_rating = request.session['user_inputs_ratings'][iid]
-        #             # movie_rating = str(int(movie_rating) * 2)
-        #             l = list()
-        #             l.append(movie_info)
-        #             l.append(movie_rating)
-        #             data_dict[iid] = l
-        #     print(request.session['user_inputs_ratings'])
-        #     return render(request, template_name=template_name, context={'data_dict': data_dict, 'nb_item': len(data_dict.keys())})
-    #
-    # if request.is_ajax() and request.POST['action'] == 'second_call':
-    #     input_iid = request.POST.get('data_dict[movie_id]')
-    #     input_rating = request.POST.get('data_dict[movie_rating]')
-    #     if not input_iid is None:
-    #         user_inputs_ratings[input_iid] = input_rating
-    #         request.session['user_inputs_ratings'] = user_inputs_ratings
-    #         response = HttpResponse(input_rating, content_type="text/html")
-    #         return response
+
     if not 'user_inputs_ratings' in request.session.keys():
         return render(request, template_name=template_name, context={'nb_item': 0})
     else:
@@ -172,8 +146,9 @@ def recommendation_view(request):
             rec_dict = dict()
             if recommender == 'cbf':
                 recommended_items_cbf = cbf_recommender(_NB_REC, request.session['user_inputs_ratings'])
+                print("Content-based recommendations:" + str(recommended_items_cbf))
                 request.session['recommended_items_cbf'] = recommended_items_cbf
-                for iid, predicted_r in recommended_items_cbf:
+                for iid in recommended_items_cbf:
                     if iid in movies.keys():
                         movie_info = movies[iid]
                         rec_dict[iid] = movie_info
@@ -181,8 +156,9 @@ def recommendation_view(request):
 
             if recommender == 'svd':
                 recommended_items_svd = svd_recommender(_NB_REC, request.session['user_inputs_ratings'])
+                print("CF-based recommendations:" + str(recommended_items_svd))
                 request.session['recommended_items_svd'] = recommended_items_svd
-                for iid, predicted_r in recommended_items_svd:
+                for iid in recommended_items_svd:
                     if iid in movies.keys():
                         movie_info = movies[iid]
                         rec_dict[iid] = movie_info
@@ -190,8 +166,9 @@ def recommendation_view(request):
 
             if recommender == 'hybride':
                 recommended_items_hybride = hybride_recommender(_NB_REC, request.session['user_inputs_ratings'])
+                print("Hybrid recommendations:" + str(recommended_items_hybride))
                 request.session['recommended_items_hybride'] = recommended_items_hybride
-                for iid, predicted_r in recommended_items_hybride:
+                for iid in recommended_items_hybride:
                     if iid in movies.keys():
                         movie_info = movies[iid]
                         rec_dict[iid] = movie_info
@@ -224,7 +201,7 @@ def top_1_explanation_view(request):
         exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = exp_generator(input_dict, recommended_items)
 
         rec_dict = dict(dict())
-        for iid, predicted_r in recommended_items:
+        for iid in recommended_items:
             exp_dict = dict()
             if iid in movies.keys():
                 movie_info = movies[iid]
@@ -273,7 +250,7 @@ def re_eval_view(request):
     for recommendation_approach in recommendation_approaches:
         rec_dict = dict()
         recommended_items = request.session[recommendation_approach][:1]
-        for iid, predicted_r in recommended_items:
+        for iid in recommended_items:
             if iid in movies.keys():
                 movie_info = movies[iid]
                 rec_dict[iid] = movie_info
@@ -281,7 +258,7 @@ def re_eval_view(request):
 
     return render(request, template_name=template_name, context={'recomm_dicts': rec_dicts})
 
-@cache_page(60 * 15)
+# @cache_page(60 * 15)
 def explanation_view(request):
     template_name = 'recsys_demo/explanation.html'
 
@@ -308,7 +285,7 @@ def explanation_view(request):
         exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = exp_generator(input_dict, recommended_items)
 
         rec_dict = dict(dict())
-        for iid, predicted_r in recommended_items:
+        for iid in recommended_items:
             exp_dict = dict()
             if iid in movies.keys():
                 movie_info = movies[iid]

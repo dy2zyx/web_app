@@ -1,42 +1,36 @@
-import os
 import heapq
-import pickle
 import pandas as pd
-import numpy as np
 import random
-import math
-import scipy
 
-from django.conf import settings
 from scipy.spatial.distance import cosine
 from surprise import SVD, Reader, Dataset
-from SPARQLWrapper import SPARQLWrapper2, SPARQLWrapper, JSON
-from collections import defaultdict
-from recsys_demo.explainer import Explainer
+
+from .modules.explainer_v2 import *
+
 
 movies = dict()
 iid_uri_dict = dict()
 uri_iid_dict = dict()
 
-PROPERTIE_LABEL_DICT = {
-    'http://purl.org/dc/terms/subject': 'category',
-    'http://dbpedia.org/ontology/musicComposer': 'music composer',
-    'http://dbpedia.org/ontology/starring': 'actor',
-    'http://dbpedia.org/ontology/director': 'director',
-    'http://dbpedia.org/ontology/distributor': 'distributor',
-    'http://dbpedia.org/ontology/writer': 'writer',
-    'http://dbpedia.org/ontology/producer': 'producer',
-    'http://dbpedia.org/ontology/cinematography': 'cinematography',
-    'http://dbpedia.org/ontology/editing': 'editing',
-    'http://dbpedia.org/property/starring': 'actor',
-    'http://dbpedia.org/property/musicComposer': 'music composer',
-    'http://dbpedia.org/property/director': 'director',
-    'http://dbpedia.org/property/distributor': 'distributor',
-    'http://dbpedia.org/property/writer': 'writer',
-    'http://dbpedia.org/property/producer': 'producer',
-    'http://dbpedia.org/property/cinematography': 'cinematography',
-    'http://dbpedia.org/property/editing': 'editing',
-}
+# PROPERTIE_LABEL_DICT = {
+#     'http://purl.org/dc/terms/subject': 'category',
+#     'http://dbpedia.org/ontology/musicComposer': 'music composer',
+#     'http://dbpedia.org/ontology/starring': 'actor',
+#     'http://dbpedia.org/ontology/director': 'director',
+#     'http://dbpedia.org/ontology/distributor': 'distributor',
+#     'http://dbpedia.org/ontology/writer': 'writer',
+#     'http://dbpedia.org/ontology/producer': 'producer',
+#     'http://dbpedia.org/ontology/cinematography': 'cinematography',
+#     'http://dbpedia.org/ontology/editing': 'editing',
+#     'http://dbpedia.org/property/starring': 'actor',
+#     'http://dbpedia.org/property/musicComposer': 'music composer',
+#     'http://dbpedia.org/property/director': 'director',
+#     'http://dbpedia.org/property/distributor': 'distributor',
+#     'http://dbpedia.org/property/writer': 'writer',
+#     'http://dbpedia.org/property/producer': 'producer',
+#     'http://dbpedia.org/property/cinematography': 'cinematography',
+#     'http://dbpedia.org/property/editing': 'editing',
+# }
 
 def init():
     with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/dict_item_emb_v5.pickle'), 'rb') as file:
@@ -55,31 +49,21 @@ def init():
                 iid_uri_dict[iid] = uri
                 uri_iid_dict[uri] = iid
 
-    global nb_movie
-    query = """
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX dbo: <http://dbpedia.org/ontology/>
+    global loader
+    loader = GraphLoader()
 
-        select (count(distinct ?s) as ?nb_movie)
-        where {
-        ?s rdf:type dbo:Film .
-        }
-    """
-#     sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-    sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
+    global graph_for_explod
+    graph_for_explod = GraphForExplod()
 
-    sparql.setQuery(query)
-    for result in sparql.query().bindings:
-        nb_movie = int(result["nb_movie"].value)
+    global graph_for_proposed
+    graph_for_proposed = GraphForProposed()
 
 
 def parse_movie_metadata():
-    # movies_by_id = dict()
     with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/movies_v5.csv'), 'r') as movie_data:
         line = movie_data.readline()
 
         while line != None and line != '':
-            # print(line)
             movie = dict()
             id, title, release_date, poster_path, overview = line.split("::::")[0], \
                                                              line.split("::::")[1], \
@@ -90,14 +74,10 @@ def parse_movie_metadata():
             movie['release_date'] = release_date
             movie['poster_path'] = poster_path
             movie['overview'] = overview
-            # add movie uri
             movie['dbpedia_uri'] = iid_uri_dict[id]
             movies[id] = movie
 
             line = movie_data.readline()
-        # global nb_movie
-        # nb_movie = len(movies.keys())
-    # return movies_by_id
 
 
 def compute_sim(i, j):
@@ -130,13 +110,14 @@ def cbf_recommender(n, input_dict):
         predicted_r = cbf_predict(input_dict, candidate)
         top_n.append((candidate, predicted_r))
     top_n = heapq.nlargest(n, top_n, key=lambda x:x[1])
+    top_n = [item for item, pred in top_n]
     return top_n
 
 
 def svd_predict(u_f, candidate):
     candidate_factor = pretrain_svd.qi[pretrain_svd.trainset.to_inner_iid(candidate)]
 
-    rating =np.dot(candidate_factor, u_f)
+    rating = np.dot(candidate_factor, u_f)
 
     return rating
 
@@ -156,7 +137,10 @@ def svd_recommender(n, input_dict):
     reader = Reader(rating_scale=(0, 10))
     data = Dataset.load_from_df(df=df, reader=reader)
     train = data.build_full_trainset()
-    svd = SVD()
+
+    lr_all, n_epochs, n_factors, reg_all = 0.0019, 50, 199, 0.0132
+    svd = SVD(n_factors=n_factors, n_epochs=n_epochs, lr_all=lr_all, reg_all=reg_all)
+    # svd = SVD()
     svd.fit(train)
     user_factor = svd.pu[svd.trainset.to_inner_uid(user)]
 
@@ -167,6 +151,7 @@ def svd_recommender(n, input_dict):
         predicted_r = svd_predict(user_factor, candidate)
         top_n.append((candidate, predicted_r))
     top_n = heapq.nlargest(n, top_n, key=lambda x:x[1])
+    top_n = [item for item, pred in top_n]
     return top_n
 
 
@@ -186,7 +171,8 @@ def hybride_recommender(n, input_dict):
     reader = Reader(rating_scale=(0, 10))
     data = Dataset.load_from_df(df=df, reader=reader)
     train = data.build_full_trainset()
-    svd = SVD()
+    lr_all, n_epochs, n_factors, reg_all = 0.0019, 50, 199, 0.0132
+    svd = SVD(n_factors=n_factors, n_epochs=n_epochs, lr_all=lr_all, reg_all=reg_all)
     svd.fit(train)
     user_factor = svd.pu[svd.trainset.to_inner_uid(user)]
 
@@ -200,311 +186,62 @@ def hybride_recommender(n, input_dict):
         predicted_r = (predicted_r_cbf + predicted_r_svd) / 2
         top_n.append((candidate, predicted_r))
     top_n = heapq.nlargest(n, top_n, key=lambda x:x[1])
+    top_n = [item for item, pred in top_n]
     return top_n
 
 
-def generate_queries(input_dict, recommended_items):
-    items_profil = [iid_uri_dict[iid] for iid in input_dict.keys()]
-    items_rec = [iid_uri_dict[iid] for iid in [rec_item for rec_item, pred_r in recommended_items]]
-
-    filter_profil = "filter ("
-    for item in items_profil:
-        item = "<" + item + ">"
-        filter_profil += "?i_prof = " + item + " || "
-    filter_profil = filter_profil[:-3]
-    filter_profil += ")"
-
-    filter_rec = "filter ("
-    for item in items_rec:
-        item = "<" + item + ">"
-        filter_rec += "?i_rec = " + item + " || "
-    filter_rec = filter_rec[:-3]
-    filter_rec += ")"
-
-    query_basic_builder = """
-        select distinct ?o
-        where {
-         ?i_prof ?p ?o .
-         ?i_rec ?p ?o .
-         """ + filter_profil + "\n" + filter_rec + """
-         filter regex(str(?o), \"http://dbpedia.org/resource\") filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
-         filter (?o != <http://dbpedia.org/resource/Category:English-language_films>)
-         filter (?o != <http://dbpedia.org/resource/Category:American_films>)
-        }
-        """
-
-    query_broader_builder = """
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        PREFIX dct: <http://purl.org/dc/terms/>
-        select distinct ?o3 ?o1 ?o2
-        where {
-         ?i_prof ?p ?o1 .
-         ?i_rec ?p ?o2 .
-         ?o1 ?p1 ?o3 .
-         ?o2 ?p1 ?o3 .
-         """ + filter_profil + "\n" + filter_rec + """
-         filter regex(str(?o3), \"http://dbpedia.org/resource\")
-         filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
-         filter (?p1 = dct:subject || ?p1 = skos:broader)
-        }
-        """
-
-    return filter_profil, filter_rec, query_basic_builder, query_broader_builder
-
-
-def basic_builder(query):
-    candidate_properties = list()
-#     sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-    sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-    sparql.setQuery(query)
-    for result in sparql.query().bindings:
-        o = result["o"].value
-        candidate_properties.append(o)
-    return candidate_properties
-
-
-def broader_builder(query):
-    # print(query)
-    candidate_properties = defaultdict(set)
-    # sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-    sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-    sparql.setQuery(query)
-
-    for result in sparql.query().bindings:
-        o3 = result["o3"].value
-        o1 = result["o1"].value
-        o2 = result["o2"].value
-        candidate_properties[o3].add(o1)
-        candidate_properties[o3].add(o2)
-    return candidate_properties
-
-
-def compute_p_score(p, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec):
-    i_u = len(input_dict.keys())
-    i_r = len(recommended_items)
-    query = """
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        PREFIX dbo: <http://dbpedia.org/ontology/>
-        select (count(distinct ?i_prof) as ?nb_i_prof) (count(distinct ?i_rec) as ?nb_i_rec) (count(distinct ?movie) as ?nb_movie)
-        where {
-            ?movie rdf:type dbo:Film .
-            ?movie ?p <""" + p + """> .
-            ?i_prof ?p <""" + p + """> . 
-            ?i_rec ?p <""" + p + """> .""" + "\n" + filter_profil + "\n" + filter_rec + """
-        }
-    """
-#         sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-    sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-    sparql.setQuery(query)
-    for result in sparql.query().bindings:
-        nb_i_prof = float(result["nb_i_prof"].value)
-        nb_i_rec = float(result["nb_i_rec"].value)
-        p_freq = float(result["nb_movie"].value)
-
-    idf_p = 0 if p_freq == 0 else math.log2(nb_movie / p_freq)
-    p_score = (alpha * nb_i_prof / i_u + beta * nb_i_rec / i_r) * idf_p
-    return p_score
-
-
-def rank_p_basic(candidate_properties, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec):
-    basic_p_scores = dict()
-    for p in candidate_properties:
-        p_score = compute_p_score(p, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec)
-        basic_p_scores[p] = p_score
-    ranked_ppt_explod = list({k: v for k, v in sorted(basic_p_scores.items(), key=lambda item: item[1], reverse=True)})
-    return ranked_ppt_explod
-
-
-def rank_p_broader(candidate_properties_broader, basic_p_scores, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec):
-    broader_p_scores = dict()
-    for b in candidate_properties_broader.keys():
-        basic_properties = candidate_properties_broader[b]
-        b_score = 0
-
-        for basic_p in basic_properties:
-            if basic_p not in basic_p_scores.keys():
-                b_score += compute_p_score(basic_p, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec)
-            else:
-                b_score += basic_p_scores[basic_p]
-
-        query1 = """
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            PREFIX dbo: <http://dbpedia.org/ontology/>
-            PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-            PREFIX dct: <http://purl.org/dc/terms/>
-            
-            select (count(distinct ?movie) as ?nb_movie)
-            where {
-                ?movie rdf:type dbo:Film .
-                ?movie ?p ?po .
-                ?po ?p1 <""" + b + """> .
-                filter (?p1 = dct:subject || ?p1 = skos:broader)
-            }
-        """
-#         sparql = SPARQLWrapper2("http://factforge.net/repositories/ff-news")
-        sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-        sparql.setQuery(query1)
-        for result in sparql.query().bindings:
-            b_freq = int(result["nb_movie"].value)
-
-        idf_b = 0 if b_freq == 0 else math.log(nb_movie / b_freq)
-        b_score = b_score * idf_b
-        broader_p_scores[b] = b_score
-    return broader_p_scores
-
-
-def basic_patterns(top_k_properties, filter_profil, filter_rec):
-    patterns_dict = dict()
-
-    filter_top_k_p = "filter ("
-    for item in top_k_properties:
-        item = "<" + item + ">"
-        filter_top_k_p += "?o = " + item + " || "
-    filter_top_k_p = filter_top_k_p[:-3]
-    filter_top_k_p += ")"
-
-    query = """
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        select distinct ?i_prof ?p ?label_o ?i_rec
-        where {
-            ?i_prof ?p ?o .
-            ?i_rec ?p ?o . """ + "\n" + filter_profil + "\n" + filter_rec + "\n" + filter_top_k_p + """\n
-            ?o rdfs:label ?label_o .
-            filter (lang(?label_o) = 'en')
-            filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
-            }
-    """
-#     print(query)
-    sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-    sparql.setQuery(query)
-    for result in sparql.query().bindings:
-        i_prof = result["i_prof"].value
-        p = result["p"].value
-        o = result["label_o"].value
-        i_rec = result["i_rec"].value
-        if i_rec not in patterns_dict.keys():
-            predicate_dict = dict()
-            if p not in predicate_dict.keys():
-                po_dict = defaultdict(list)
-                po_dict[o].append(i_prof)
-                predicate_dict[p] = po_dict
-                patterns_dict[i_rec] = predicate_dict
-            else:
-                predicate_dict[p][o].append(i_prof)
-                patterns_dict[i_rec] = predicate_dict
-        else:
-            predicate_dict = patterns_dict[i_rec]
-            if p not in predicate_dict.keys():
-                po_dict = defaultdict(list)
-                po_dict[o].append(i_prof)
-                predicate_dict[p] = po_dict
-                patterns_dict[i_rec] = predicate_dict
-            else:
-                predicate_dict[p][o].append(i_prof)
-                patterns_dict[i_rec] = predicate_dict
-    return patterns_dict
-
-
-def broader_patterns(top_k_properties, filter_profil, filter_rec):
-    patterns_dict = dict()
-
-    filter_top_k_p = "filter ("
-    for item in top_k_properties:
-        item = "<" + item + ">"
-        filter_top_k_p += "?o3 = " + item + " || "
-    filter_top_k_p = filter_top_k_p[:-3]
-    filter_top_k_p += ")"
-
-    query = """
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        PREFIX dct: <http://purl.org/dc/terms/>
-        select distinct ?i_prof ?p ?label_o ?i_rec
-        where {
-            ?i_prof ?p ?o1 .
-            ?i_rec ?p ?o2 .
-            ?o1 ?p1 ?o3 .
-            ?o2 ?p1 ?o3 .
-            """ + "\n" + filter_profil + "\n" + filter_rec + "\n" + filter_top_k_p + """\n
-            ?o3 rdfs:label ?label_o .
-            filter (lang(?label_o) = 'en')
-            filter (?p != <http://dbpedia.org/ontology/wikiPageWikiLink>)
-            filter (?p1 = dct:subject || ?p1 = skos:broader)
-            }
-    """
-#     print(query)
-    sparql = SPARQLWrapper2("http://dbpedia.org/sparql")
-    sparql.setQuery(query)
-    for result in sparql.query().bindings:
-        i_prof = result["i_prof"].value
-        p = result["p"].value
-        o = result["label_o"].value
-        i_rec = result["i_rec"].value
-        if i_rec not in patterns_dict.keys():
-            predicate_dict = dict()
-            if p not in predicate_dict.keys():
-                po_dict = defaultdict(list)
-                po_dict[o].append(i_prof)
-                predicate_dict[p] = po_dict
-                patterns_dict[i_rec] = predicate_dict
-            else:
-                predicate_dict[p][o].append(i_prof)
-                patterns_dict[i_rec] = predicate_dict
-        else:
-            predicate_dict = patterns_dict[i_rec]
-            if p not in predicate_dict.keys():
-                po_dict = defaultdict(list)
-                po_dict[o].append(i_prof)
-                predicate_dict[p] = po_dict
-                patterns_dict[i_rec] = predicate_dict
-            else:
-                predicate_dict[p][o].append(i_prof)
-                patterns_dict[i_rec] = predicate_dict
-    return patterns_dict
-
-
-def generate_exp_from_pattern(pattern_dict):
+def generate_exp_from_pattern_pem(pattern):
     explanation = ""
-    if len(pattern_dict.keys()) == 0:
+    if len(pattern) == 0:
         explanation = 'Hops, it seems that it is failed to generate explanation for this item.'
-        return explanation
-
-    elif len(pattern_dict.keys()) == 1:
-        explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since', 'as'])
-        ppt = next(iter(pattern_dict))
-        po_dict = pattern_dict[ppt]
-        ppt = PROPERTIE_LABEL_DICT[ppt] if ppt in PROPERTIE_LABEL_DICT.keys() else ppt
-        for key, value in po_dict.items():
-            key = key[1] if isinstance(key, tuple) else key
-            movies_exp = " movies" if len(value) > 1 else " movie"
-            if len(value) == 1:
-                m_titles_exp = "<b>" + movies[uri_iid_dict[value[0]]]['title'] + "</b>"
-            else:
-                m_titles_exp = ""
-                for m in value:
-                    m_titles_exp += "<b>" + movies[uri_iid_dict[m]]['title'] + "</b>" + ", "
-            explanation += " you " + random.choice(['loves', 'likes', 'prefers']) + movies_exp + " whose " + str(ppt) + " is " + "<i>" + str(key) + "</i>" + " as " + m_titles_exp + "."
         return explanation
     else:
         count = 1
-        for ppt in pattern_dict.keys():
+        for pattern_item in pattern:
+            ppt = pattern_item[5]
+            items_profile = pattern_item[4]
             if count == 1:
-                explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['beacause', 'since', 'as'])
+                explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['because', 'since', 'as'])
             else:
-                explanation += random.choice([' Furthermore', ' Moreover', ' In addition']) + ", we " + random.choice(['recommend', 'suggest', 'provide']) + " you it " + random.choice(['beacause', 'since'])
+                explanation += random.choice([' Furthermore', ' Moreover', ' In addition']) + ", we " + random.choice(['recommend', 'suggest', 'provide']) + " you it " + random.choice(['because', 'since', 'as'])
 
-            po_dict = pattern_dict[ppt]
-            ppt = PROPERTIE_LABEL_DICT[ppt] if ppt in PROPERTIE_LABEL_DICT.keys() else ppt
-            for key, value in po_dict.items():
-                key = key[1] if isinstance(key, tuple) else key
-                movies_exp = " movies" if len(value) > 1 else " movie"
-                if len(value) == 1:
-                    m_titles_exp = "<b>" + movies[uri_iid_dict[value[0]]]['title'] + "</b>"
-                else:
-                    m_titles_exp = ""
-                    for m in value:
-                        m_titles_exp += "<b>" + movies[uri_iid_dict[m]]['title'] + "</b>" + ", "
-                explanation += " you " + random.choice(['loves', 'likes', 'prefers']) + movies_exp + " whose " + str(ppt) + " is " + "<i>" + str(key) + "</i>" + " as " + m_titles_exp + "."
+            movies_exp = " movies" if len(items_profile) > 1 else " movie"
+
+            if len(items_profile) == 1:
+                m_titles_exp = "<b>" + movies[list(items_profile)[0]]['title'] + "</b>"
+            else:
+                m_titles_exp = ""
+                for m in items_profile:
+                    m_titles_exp += "<b>" + movies[m]['title'] + "</b>" + ", "
+            explanation += " you " + random.choice(['love', 'like', 'prefer']) + movies_exp + " whose " + random.choice(['category', 'genre']) + " is " + "<i>" + str(ppt) + "</i>" + " as " + m_titles_exp + "."
+            count += 1
+        return explanation
+
+
+def generate_exp_from_pattern_explod(pattern):
+    explanation = ""
+    if len(pattern) == 0:
+        explanation = 'Hops, it seems that it is failed to generate explanation for this item.'
+        return explanation
+    else:
+        count = 1
+        for pattern_item in pattern:
+            ppt = pattern_item[3]
+            items_profile = pattern_item[2]
+            if count == 1:
+                explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['because', 'since', 'as'])
+            else:
+                explanation += random.choice([' Furthermore', ' Moreover', ' In addition']) + ", we " + random.choice(['recommend', 'suggest', 'provide']) + " you it " + random.choice(['because', 'since', 'as'])
+
+            movies_exp = " movies" if len(items_profile) > 1 else " movie"
+
+            if len(items_profile) == 1:
+                m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>"
+            else:
+                m_titles_exp = ""
+                for m in items_profile:
+                    m_titles_exp += "<b>" + movies[m]['title'] + "</b>" + ", "
+            explanation += " you " + random.choice(['love', 'like', 'prefer']) + movies_exp + " whose " + random.choice(['category', 'genre']) + " is " + "<i>" + str(ppt) + "</i>" + " as " + m_titles_exp + "."
             count += 1
         return explanation
 
@@ -524,82 +261,24 @@ def generate_exp_from_pattern_cem(pattern_dict):
         return "not possible"
 
 
-def basic_exp_generator(input_dict, recommended_items, alpha=1, beta=0, nb_p=3):
-    # generate queries
-    filter_profil, filter_rec, query_basic_builder, query_broader_builder = generate_queries(input_dict, recommended_items)
-    # filter properties to get overlap ones
-    candidate_properties = basic_builder(query_basic_builder)
-    # scoring these properties
-    ranked_ppt_explod = rank_p_basic(candidate_properties, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec)
-    # extract the top-k properties
-    top_k_properties = ranked_ppt_explod[:nb_p]
-    # generate patterns for explanation
-    patterns_dict = basic_patterns(top_k_properties, filter_profil, filter_rec)
-    # for each recommended movie, generate explanations
-    exp_output_dict = dict()
-    for rec_item in patterns_dict.keys():
-        pattern = patterns_dict[rec_item]
-        explantion = generate_exp_from_pattern(pattern)
-        exp_output_dict[uri_iid_dict[rec_item]] = explantion
-    return exp_output_dict
+def exp_generator(input_dict, recommended_items):
+    explainer_explod = ExpLodBroader(loader, graph_for_explod, recommended_items=recommended_items, profile_items=input_dict)
+    pattern_dict_explod = explainer_explod.explain()
 
+    explainer_proposed = ExpProposed(loader, graph_for_proposed, recommended_items=recommended_items, profile_items=input_dict)
+    pattern_dict_pem, patterns_dict_cem = explainer_proposed.explain()
 
-def broader_exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3):
-    # generate queries
-    filter_profil, filter_rec, query_basic_builder, query_broader_builder = generate_queries(input_dict, recommended_items)
-    # filter properties to get overlap ones
-    candidate_properties_basic = basic_builder(query_basic_builder)
-    # scoring these properties
-    basic_p_scores = rank_p_basic(candidate_properties_basic, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec)
-    # filter properties to get overlap ones
-    candidate_properties_broader = broader_builder(query_broader_builder)
-    # scoring these properties
-    broader_p_scores = rank_p_broader(candidate_properties_broader, basic_p_scores, input_dict, recommended_items, alpha, beta, filter_profil, filter_rec)
-    # extract the top-k properties
-    top_properties = list({k: v for k, v in sorted(broader_p_scores.items(), key=lambda item: item[1], reverse=True)})[:k]
-    # generate patterns for explanation
-    patterns_dict = broader_patterns(top_properties, filter_profil, filter_rec)
-    # for each recommended movie, generate explanations
-    exp_output_dict = dict()
-    for rec_item in patterns_dict.keys():
-        pattern = patterns_dict[rec_item]
-        explantion = generate_exp_from_pattern(pattern)
-        exp_output_dict[uri_iid_dict[rec_item]] = explantion
-    return exp_output_dict
-
-
-def pem_cem_exp_generator(input_dict, recommended_items):
-    exp_kge = Explainer(recommended_items=recommended_items, input_dict=input_dict)
-    pattern_dict, patterns_dict_cem = exp_kge.exp_generator()
-    exp_output_dict_pem, exp_output_dict_cem = dict(), dict()
-
-    for rec_item in pattern_dict.keys():
-        pattern = pattern_dict[rec_item]
-        explantion = generate_exp_from_pattern(pattern)
-        exp_output_dict_pem[rec_item] = explantion
-
-    for rec_item in patterns_dict_cem.keys():
-        pattern = patterns_dict_cem[rec_item]
-        explantion = generate_exp_from_pattern_cem(pattern)
-        if not explantion == "not possible":
-            exp_output_dict_cem[rec_item] = explantion
-    return exp_output_dict_pem, exp_output_dict_cem
-
-
-def exp_generator(input_dict, recommended_items, alpha=0.5, beta=0.5, k=3):
-    explainer = Explainer(recommended_items=recommended_items, input_dict=input_dict)
-    pattern_dict_explod, pattern_dict_pem, patterns_dict_cem = explainer.exp_generator()
     exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = dict(), dict(), dict()
 
     for rec_item in pattern_dict_explod.keys():
         pattern = pattern_dict_explod[rec_item]
-        explantion = generate_exp_from_pattern(pattern)
-        exp_output_dict_explod[uri_iid_dict[rec_item]] = explantion
+        explantion = generate_exp_from_pattern_explod(pattern)
+        exp_output_dict_explod[rec_item] = explantion
 
     for rec_item in pattern_dict_pem.keys():
         pattern = pattern_dict_pem[rec_item]
-        explantion = generate_exp_from_pattern(pattern)
-        exp_output_dict_pem[uri_iid_dict[rec_item]] = explantion
+        explantion = generate_exp_from_pattern_pem(pattern)
+        exp_output_dict_pem[rec_item] = explantion
 
     for rec_item in patterns_dict_cem.keys():
         pattern = patterns_dict_cem[rec_item]

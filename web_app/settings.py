@@ -90,9 +90,9 @@ WSGI_APPLICATION = 'web_app.wsgi.application'
 # }
 
 POSTGRES_HOST = os.environ.get('POSTGRES_HOST', default="")
-POSTGRES_DB = os.environ.get('POSTGRES_DB', default="")
-POSTGRES_USER = os.environ.get('POSTGRES_USER', default="")
-POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default="")
+POSTGRES_DB = os.environ.get('POSTGRES_DB', default="postgres")
+POSTGRES_USER = os.environ.get('POSTGRES_USER', default="yudu")
+POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', default="admin")
 
 DATABASES = {
     'default': {

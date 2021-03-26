@@ -8,9 +8,7 @@ $(document).ready(function () {
             console.log(feedback_dict)
 	});
    $("#feedback_exp_top1").on('click', function () {
-        console.log("ajax")
-        console.log(feedback_dict)
-        $.ajax({
+            $.ajax({
             method: 'POST',
             url: window.location.href,
             data: {'feedback_top1': JSON.stringify(feedback_dict)},
@@ -25,4 +23,5 @@ $(document).ready(function () {
         });
     });
 });
+
 

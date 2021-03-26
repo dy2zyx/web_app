@@ -22,6 +22,7 @@ services:
       - db_migrate
     ports:
       - "8000:8000"
+
   db_migrate:
     image: web_app:latest
     command: python manage.py migrate
