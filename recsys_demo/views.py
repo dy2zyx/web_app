@@ -26,7 +26,7 @@ random_movie_ids = random.sample(movies.keys(), k=10)
 random_movies_dict = dict()
 random_movie_id_dict = dict()
 compteur = 0
-_NB_REC = 3
+_NB_REC = 5
 
 for m_id in random_movie_ids:
     random_movies_dict[m_id] = (movies[m_id], compteur)
@@ -80,9 +80,7 @@ def movierec_view(request):
         if not input_iid is None:
             user_inputs_ratings[input_iid] = input_rating
             request.session['user_inputs_ratings'] = user_inputs_ratings
-            # print(request.session['user_inputs'])
-            # print(request.session['user_inputs_ratings'])
-            # print(user_inputs_ratings)
+            print(request.session['user_inputs_ratings'])
             response = HttpResponse(input_rating, content_type="text/html")
             return response
 
@@ -110,6 +108,7 @@ def profil_view(request):
         removed_movie_id = request.POST.get('removed_movie_id')
         print(removed_movie_id)
         del request.session['user_inputs_ratings'][str(removed_movie_id)]
+        del user_inputs_ratings[str(removed_movie_id)]
         request.session.modified = True
 
     if not 'user_inputs_ratings' in request.session.keys():
@@ -130,50 +129,61 @@ def profil_view(request):
         print(request.session['user_inputs_ratings'])
         return render(request, template_name=template_name, context={'data_dict': data_dict, 'nb_item': len(data_dict.keys())})
 
+
 # @cache_page(60 * 15)
 def recommendation_view(request):
     template_name = 'recsys_demo/recommendation.html'
 
     if 'user_inputs_ratings' not in request.session.keys() or len(request.session['user_inputs_ratings'].keys()) < 5:
-        warning_msg = 'Note that you have to choose at least 5 liked movies before asking for recommendations'
+        # warning_msg = 'Note that you have to choose at least 5 liked movies before asking for the recommendations'
+        warning_msg = 'Notez que vous devrez choisir au moins 5 films préférés avant de pouvoir obtenir la recommandation'
         messages.warning(request, warning_msg)
         return HttpResponseRedirect('profil')
     else:
-        recommenders = ['cbf', 'svd', 'hybride']
+        recommenders = ['hybride']
+        recommender = 'hybride'
+        print(recommender)
+        # save the algo_config for user
+        current_user_id = request.session['current_user_metadata']['user_id']
+        user_info = UserInfo.objects.get(id=current_user_id)
+        user_info.algo_config = str(recommender)
+        user_info.save()
+
         rec_dicts = list()
-        for recommender in recommenders:
-            print(recommender)
-            rec_dict = dict()
-            if recommender == 'cbf':
-                recommended_items_cbf = cbf_recommender(_NB_REC, request.session['user_inputs_ratings'])
-                print("Content-based recommendations:" + str(recommended_items_cbf))
-                request.session['recommended_items_cbf'] = recommended_items_cbf
-                for iid in recommended_items_cbf:
-                    if iid in movies.keys():
-                        movie_info = movies[iid]
-                        rec_dict[iid] = movie_info
-                rec_dicts.append(rec_dict)
+        # for recommender in recommenders:
+        rec_dict = dict()
+        if recommender == 'cbf':
+            recommended_items_cbf = cbf_recommender(_NB_REC, request.session['user_inputs_ratings'])
+            print("Content-based recommendations:" + str(recommended_items_cbf))
+            # request.session['recommended_items_cbf'] = recommended_items_cbf
+            request.session['recommended_items'] = recommended_items_cbf
+            for iid in recommended_items_cbf:
+                if iid in movies.keys():
+                    movie_info = movies[iid]
+                    rec_dict[iid] = movie_info
+            rec_dicts.append(rec_dict)
 
-            if recommender == 'svd':
-                recommended_items_svd = svd_recommender(_NB_REC, request.session['user_inputs_ratings'])
-                print("CF-based recommendations:" + str(recommended_items_svd))
-                request.session['recommended_items_svd'] = recommended_items_svd
-                for iid in recommended_items_svd:
-                    if iid in movies.keys():
-                        movie_info = movies[iid]
-                        rec_dict[iid] = movie_info
-                rec_dicts.append(rec_dict)
+        if recommender == 'svd':
+            recommended_items_svd = svd_recommender(_NB_REC, request.session['user_inputs_ratings'])
+            print("CF-based recommendations:" + str(recommended_items_svd))
+            request.session['recommended_items'] = recommended_items_svd
+            for iid in recommended_items_svd:
+                if iid in movies.keys():
+                    movie_info = movies[iid]
+                    rec_dict[iid] = movie_info
+            rec_dicts.append(rec_dict)
 
-            if recommender == 'hybride':
-                recommended_items_hybride = hybride_recommender(_NB_REC, request.session['user_inputs_ratings'])
-                print("Hybrid recommendations:" + str(recommended_items_hybride))
-                request.session['recommended_items_hybride'] = recommended_items_hybride
-                for iid in recommended_items_hybride:
-                    if iid in movies.keys():
-                        movie_info = movies[iid]
-                        rec_dict[iid] = movie_info
-                rec_dicts.append(rec_dict)
+        if recommender == 'hybride':
+            recommended_items_hybride = hybride_recommender(_NB_REC, request.session['user_inputs_ratings'])
+            print("Hybrid recommendations:" + str(recommended_items_hybride))
+            request.session['recommended_items'] = recommended_items_hybride
+            for iid in recommended_items_hybride:
+                if iid in movies.keys():
+                    movie_info = movies[iid]
+                    rec_dict[iid] = movie_info
+            rec_dicts.append(rec_dict)
         return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
+
 
 # @cache_page(60 * 15)
 def top_1_explanation_view(request):
@@ -192,42 +202,46 @@ def top_1_explanation_view(request):
         response = HttpResponse(message, content_type="text/html")
         return response
 
-    # explanation_styles = ['basic', 'pem_cem']
-    recommendation_approaches = ['recommended_items_cbf', 'recommended_items_svd', 'recommended_items_hybride']
     rec_dicts = list()
-    for recommendation_approach in recommendation_approaches:
-        input_dict = request.session['user_inputs_ratings']
-        recommended_items = request.session[recommendation_approach][:1]
-        exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = exp_generator(input_dict, recommended_items)
+    # for recommendation_approach in recommendation_approaches:
+    input_dict = request.session['user_inputs_ratings']
+    recommended_items = request.session['recommended_items'][:1]
 
-        rec_dict = dict(dict())
-        for iid in recommended_items:
-            exp_dict = dict()
-            if iid in movies.keys():
-                movie_info = movies[iid]
-                if iid in exp_output_dict_explod.keys():
-                    explanation_explod = exp_output_dict_explod[iid]
-                    exp_dict['explod'] = (movie_info, explanation_explod)
-                else:
-                    explanation_explod = "Hops, it seems that it is failed to generate explanation for this item."
-                    exp_dict['explod'] = (movie_info, explanation_explod)
+    # random choice of explanation style and save to user configs
+    explanation_styles = ['explod', 'pem']
+    explanation_style = random.choice(explanation_styles)
+    print(explanation_style)
+    request.session['explanation_style'] = explanation_style
+    # save the algo_config for user
+    current_user_id = request.session['current_user_metadata']['user_id']
+    user_info = UserInfo.objects.get(id=current_user_id)
+    user_info.exp_style_config = str(explanation_style)
+    user_info.save()
 
-                if iid in exp_output_dict_pem.keys():
-                    explanation_pem = exp_output_dict_pem[iid]
-                    exp_dict['pem'] = (movie_info, explanation_pem)
-                else:
-                    explanation_pem = "Hops, it seems that it is failed to generate explanation for this item."
-                    exp_dict['pem'] = (movie_info, explanation_pem)
+    exp_output_dict = exp_generator(input_dict, recommended_items, exp_style=explanation_style)
 
-                if iid in exp_output_dict_cem.keys():
-                    explanation_cem = exp_output_dict_cem[iid]
-                    exp_dict['cem'] = (movie_info, explanation_cem)
-                else:
-                    explanation_cem = "Hops, it seems that it is failed to generate explanation for this item."
-                    exp_dict['cem'] = (movie_info, explanation_cem)
-                rec_dict[iid] = exp_dict
-        rec_dicts.append(rec_dict)
+    # save the algo_config for user
+    # current_user_id = request.session['current_user_metadata']['user_id']
+    # user_info = UserInfo.objects.get(id=current_user_id)
+    user_info.num_exp_top_1 = str(len(exp_output_dict.keys()))
+    user_info.save()
+
+    rec_dict = dict(dict())
+    for iid in recommended_items:
+        exp_dict = dict()
+        if iid in movies.keys():
+            movie_info = movies[iid]
+            if iid in exp_output_dict.keys():
+                explanation = exp_output_dict[iid]
+                exp_dict['exp_style'] = (movie_info, explanation)
+            else:
+                explanation = "Hops, it seems that it is failed to generate explanation for this item."
+                exp_dict['exp_style'] = (movie_info, explanation)
+
+            rec_dict[iid] = exp_dict
+    rec_dicts.append(rec_dict)
     return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
+
 
 # @cache_page(60 * 15)
 def re_eval_view(request):
@@ -246,17 +260,18 @@ def re_eval_view(request):
 
     rec_dicts = list()
 
-    recommendation_approaches = ['recommended_items_cbf', 'recommended_items_svd', 'recommended_items_hybride']
-    for recommendation_approach in recommendation_approaches:
-        rec_dict = dict()
-        recommended_items = request.session[recommendation_approach][:1]
-        for iid in recommended_items:
-            if iid in movies.keys():
-                movie_info = movies[iid]
-                rec_dict[iid] = movie_info
-        rec_dicts.append(rec_dict)
+    # recommendation_approaches = ['recommended_items_cbf', 'recommended_items_svd', 'recommended_items_hybride']
+    # for recommendation_approach in recommendation_approaches:
+    rec_dict = dict()
+    recommended_items = request.session['recommended_items'][:1]
+    for iid in recommended_items:
+        if iid in movies.keys():
+            movie_info = movies[iid]
+            rec_dict[iid] = movie_info
+    rec_dicts.append(rec_dict)
 
     return render(request, template_name=template_name, context={'recomm_dicts': rec_dicts})
+
 
 # @cache_page(60 * 15)
 def explanation_view(request):
@@ -276,39 +291,30 @@ def explanation_view(request):
         return response
 
     # explanation_styles = ['basic', 'pem_cem']
-    recommendation_approaches = ['recommended_items_cbf', 'recommended_items_svd', 'recommended_items_hybride']
+    # recommendation_approaches = ['recommended_items_cbf', 'recommended_items_svd', 'recommended_items_hybride']
 
     rec_dicts = list()
-    for recommendation_approach in recommendation_approaches:
-        input_dict = request.session['user_inputs_ratings']
-        recommended_items = request.session[recommendation_approach]
-        exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = exp_generator(input_dict, recommended_items)
+    # for recommendation_approach in recommendation_approaches:
+    input_dict = request.session['user_inputs_ratings']
+    recommended_items = request.session['recommended_items']
+    explanation_style = request.session['explanation_style']
+    exp_output_dict = exp_generator(input_dict, recommended_items, exp_style=explanation_style)
 
-        rec_dict = dict(dict())
-        for iid in recommended_items:
-            exp_dict = dict()
-            if iid in movies.keys():
-                movie_info = movies[iid]
-                if iid in exp_output_dict_explod.keys():
-                    explanation_explod = exp_output_dict_explod[iid]
-                    exp_dict['explod'] = (movie_info, explanation_explod)
-                else:
-                    explanation_explod = "Hops, it seems that it is failed to generate explanation for this item."
-                    exp_dict['explod'] = (movie_info, explanation_explod)
+    user_info = UserInfo.objects.get(id=current_user_id)
+    user_info.num_exp_top_5_list = str(len(exp_output_dict.keys()))
+    user_info.save()
 
-                if iid in exp_output_dict_pem.keys():
-                    explanation_pem = exp_output_dict_pem[iid]
-                    exp_dict['pem'] = (movie_info, explanation_pem)
-                else:
-                    explanation_pem = "Hops, it seems that it is failed to generate explanation for this item."
-                    exp_dict['pem'] = (movie_info, explanation_pem)
-
-                if iid in exp_output_dict_cem.keys():
-                    explanation_cem = exp_output_dict_cem[iid]
-                    exp_dict['cem'] = (movie_info, explanation_cem)
-                else:
-                    explanation_cem = "Hops, it seems that it is failed to generate explanation for this item."
-                    exp_dict['cem'] = (movie_info, explanation_cem)
-                rec_dict[iid] = exp_dict
-        rec_dicts.append(rec_dict)
+    rec_dict = dict(dict())
+    for iid in recommended_items:
+        exp_dict = dict()
+        if iid in movies.keys():
+            movie_info = movies[iid]
+            if iid in exp_output_dict.keys():
+                explanation = exp_output_dict[iid]
+                exp_dict['exp_style'] = (movie_info, explanation)
+            else:
+                explanation = "Hops, it seems that it is failed to generate explanation for this item."
+                exp_dict['exp_style'] = (movie_info, explanation)
+            rec_dict[iid] = exp_dict
+    rec_dicts.append(rec_dict)
     return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})

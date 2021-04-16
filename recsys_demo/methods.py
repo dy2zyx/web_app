@@ -199,7 +199,7 @@ def generate_exp_from_pattern_pem(pattern):
         count = 1
         for pattern_item in pattern:
             ppt = pattern_item[5]
-            items_profile = pattern_item[4]
+            items_profile = list(pattern_item[4])
             if count == 1:
                 explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['because', 'since', 'as'])
             else:
@@ -208,11 +208,14 @@ def generate_exp_from_pattern_pem(pattern):
             movies_exp = " movies" if len(items_profile) > 1 else " movie"
 
             if len(items_profile) == 1:
-                m_titles_exp = "<b>" + movies[list(items_profile)[0]]['title'] + "</b>"
+                m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>"
+            elif len(items_profile) == 2:
+                m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>" + " and " + "<b>" + movies[items_profile[1]]['title'] + "</b>"
             else:
                 m_titles_exp = ""
-                for m in items_profile:
+                for m in items_profile[:(len(items_profile) - 2)]:
                     m_titles_exp += "<b>" + movies[m]['title'] + "</b>" + ", "
+                m_titles_exp = "<b>" + movies[items_profile[-2]]['title'] + "</b>" + " and " + "<b>" + movies[items_profile[-1]]['title'] + "</b>"
             explanation += " you " + random.choice(['love', 'like', 'prefer']) + movies_exp + " whose " + random.choice(['category', 'genre']) + " is " + "<i>" + str(ppt) + "</i>" + " as " + m_titles_exp + "."
             count += 1
         return explanation
@@ -237,10 +240,13 @@ def generate_exp_from_pattern_explod(pattern):
 
             if len(items_profile) == 1:
                 m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>"
+            elif len(items_profile) == 2:
+                m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>" + " and " + "<b>" + movies[items_profile[1]]['title'] + "</b>"
             else:
                 m_titles_exp = ""
-                for m in items_profile:
+                for m in items_profile[:(len(items_profile) - 2)]:
                     m_titles_exp += "<b>" + movies[m]['title'] + "</b>" + ", "
+                m_titles_exp = "<b>" + movies[items_profile[-2]]['title'] + "</b>" + " and " + "<b>" + movies[items_profile[-1]]['title'] + "</b>"
             explanation += " you " + random.choice(['love', 'like', 'prefer']) + movies_exp + " whose " + random.choice(['category', 'genre']) + " is " + "<i>" + str(ppt) + "</i>" + " as " + m_titles_exp + "."
             count += 1
         return explanation
@@ -249,40 +255,56 @@ def generate_exp_from_pattern_explod(pattern):
 def generate_exp_from_pattern_cem(pattern_dict):
     explanation = ""
     explanation += "We " + random.choice(['recommend', 'suggest', 'provide']) + " you this movie " + random.choice(['because', 'since', 'as'])
-
-    for key, value in pattern_dict.items():
-        percentage = round(value * 100, 2)
-        m_title = " <b>" + movies[key]['title'] + "</b> " + ", "
-        explanation += " <b>" + str(percentage) + "%" + "</b> " + "of users interested by " + m_title
-    explanation += " would also likely to love this movie."
+    if len(pattern_dict.keys()) == 1:
+        for key, value in pattern_dict.items():
+            percentage = round(value * 100, 2)
+            m_title = " <b>" + movies[key]['title'] + "</b> "
+            explanation += " <b>" + str(percentage) + "%" + "</b> " + "of users interested by " + m_title
+        explanation += " are likely to enjoy this movie."
+    else:
+        for key, value in pattern_dict.items():
+            percentage = round(value * 100, 2)
+            m_title = " <b>" + movies[key]['title'] + "</b> " + ", "
+            explanation += " <b>" + str(percentage) + "%" + "</b> " + "of users interested by " + m_title
+        explanation = explanation[:(len(explanation)-2)]
+        explanation += " are likely to enjoy this movie."
     if "of users interested by" in explanation:
         return explanation
     else:
         return "not possible"
 
 
-def exp_generator(input_dict, recommended_items):
-    explainer_explod = ExpLodBroader(loader, graph_for_explod, recommended_items=recommended_items, profile_items=input_dict)
-    pattern_dict_explod = explainer_explod.explain()
+def exp_generator(input_dict, recommended_items, exp_style):
 
-    explainer_proposed = ExpProposed(loader, graph_for_proposed, recommended_items=recommended_items, profile_items=input_dict)
-    pattern_dict_pem, patterns_dict_cem = explainer_proposed.explain()
+    if exp_style == 'explod':
+        explainer_explod = ExpLodBroader(loader, graph_for_explod, recommended_items=recommended_items, profile_items=input_dict)
+        pattern_dict_explod = explainer_explod.explain()
+        exp_output_dict_explod = dict()
 
-    exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem = dict(), dict(), dict()
+        for rec_item in pattern_dict_explod.keys():
+            pattern = pattern_dict_explod[rec_item]
+            explantion = generate_exp_from_pattern_explod(pattern)
+            exp_output_dict_explod[rec_item] = explantion
+        return exp_output_dict_explod
 
-    for rec_item in pattern_dict_explod.keys():
-        pattern = pattern_dict_explod[rec_item]
-        explantion = generate_exp_from_pattern_explod(pattern)
-        exp_output_dict_explod[rec_item] = explantion
+    if exp_style == 'pem':
+        explainer_proposed = ExpProposed(loader, graph_for_proposed, recommended_items=recommended_items, profile_items=input_dict)
+        pattern_dict_pem, patterns_dict_cem = explainer_proposed.explain()
+        exp_output_dict_pem = dict()
 
-    for rec_item in pattern_dict_pem.keys():
-        pattern = pattern_dict_pem[rec_item]
-        explantion = generate_exp_from_pattern_pem(pattern)
-        exp_output_dict_pem[rec_item] = explantion
+        for rec_item in pattern_dict_pem.keys():
+            pattern = pattern_dict_pem[rec_item]
+            explantion = generate_exp_from_pattern_pem(pattern)
+            exp_output_dict_pem[rec_item] = explantion
+        return exp_output_dict_pem
 
-    for rec_item in patterns_dict_cem.keys():
-        pattern = patterns_dict_cem[rec_item]
-        explantion = generate_exp_from_pattern_cem(pattern)
-        if not explantion == "not possible":
-            exp_output_dict_cem[rec_item] = explantion
-    return exp_output_dict_explod, exp_output_dict_pem, exp_output_dict_cem
+    if exp_style == 'cem':
+        explainer_proposed = ExpProposed(loader, graph_for_proposed, recommended_items=recommended_items, profile_items=input_dict)
+        pattern_dict_pem, patterns_dict_cem = explainer_proposed.explain()
+        exp_output_dict_cem = dict()
+        for rec_item in patterns_dict_cem.keys():
+            pattern = patterns_dict_cem[rec_item]
+            explantion = generate_exp_from_pattern_cem(pattern)
+            if not explantion == "not possible":
+                exp_output_dict_cem[rec_item] = explantion
+        return exp_output_dict_cem

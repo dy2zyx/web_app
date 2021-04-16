@@ -51,6 +51,8 @@ class GraphForProposed:
         with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/dict_item_liked_by_user.pickle'), 'rb') as file:
             self.dict_item_liked_by_users = pickle.load(file)
 
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/nodes_parse_post_order_new.pickle'), 'rb') as file:
+            self.nodes_parse_post_order = pickle.load(file)
 
 class ExpLodBroader:
     def __init__(self, loader, dbpedia_annotation, profile_items=None, recommended_items=None, nb_po=3, alpha=0.5, beta=0.5):
@@ -153,8 +155,23 @@ class ExpProposed:
         self.all_direct_annotations = dbpedia_annotation.all_direct_annotations
         self.dict_item_liked_by_users = dbpedia_annotation.dict_item_liked_by_users
         self.dict_user_liked_items = dbpedia_annotation.dict_user_liked_items
-
+        self.nodes_parse_post_order = dbpedia_annotation.nodes_parse_post_order
         self.ppt_item_profil_dict = self.get_properties_prof()
+        self.visited = set()
+
+    def post_order(self, root):
+        self.visited.clear()
+        root_to_post = defaultdict(list)
+        root_to_post[root] = list()
+        self.post_order_rec(root_to_post[root], root)
+        return root_to_post
+
+    def post_order_rec(self, post_order_list, current_node):
+        self.visited.add(current_node)
+        for node in self.node_children_dict_valid[current_node]:
+            if node not in self.visited:
+                self.post_order_rec(post_order_list, node)
+        post_order_list.append(current_node)
 
     def get_ancestors(self, seed_node, already_done):
         if seed_node not in already_done:
@@ -245,6 +262,42 @@ class ExpProposed:
 
             if has_equally_good_child == False:
                 candidates.append((ppt, nb_item, profile_items_associated))
+        filtered_candidates = self.filter_redondant(candidates)
+        return filtered_candidates
+
+    def filter_redondant(self, candidates):
+        filtered_candidates = list()
+        all_candidate_ppts = set([candidate[0] for candidate in candidates])
+
+        for candidate in candidates:
+            candidate_ppt = candidate[0]
+            children_candidate_ppt = self.post_order(candidate_ppt)[candidate_ppt]
+            if not len(set(children_candidate_ppt).intersection(all_candidate_ppts)) > 1:
+                filtered_candidates.append(candidate)
+        return filtered_candidates
+
+    def get_candidates_ppts2(self, recommended_item):
+        profile_ppt, ppt_2_item = self.extract_relevant_ppt()
+        rec_ppt = self.get_properties_recommend(recommended_item)
+        candidates = list()
+        relevant_ppt = profile_ppt.intersection(rec_ppt)
+        node2NbItemsMaxInDesc = dict()
+        node2NbItemsMaxInDirectRelevantDesc = dict()
+        for (ppt_idx, ppt, ppt_isLeaf, ppt_isDirect) in self.nodes_parse_post_order:
+            nbItemForThisNode = len(ppt_2_item[ppt])
+            children_ppt = self.node_children_dict_valid[ppt]
+            nbItemsMaxInDes = 0
+            nbItemsMaxInDirectRelevantDes = 0
+            for child in children_ppt:
+                nbItemsMaxInDes = max(nbItemsMaxInDes, node2NbItemsMaxInDesc[child])
+                nbItemsMaxInDirectRelevantDes = max(nbItemsMaxInDirectRelevantDes, node2NbItemsMaxInDirectRelevantDesc[child])
+            node2NbItemsMaxInDesc[ppt] = max(nbItemForThisNode, nbItemsMaxInDes)
+            if ppt_isDirect and ppt in relevant_ppt:
+                if nbItemForThisNode > nbItemsMaxInDirectRelevantDes:
+                    candidates.append((ppt, nbItemForThisNode, ppt_2_item[ppt]))
+                node2NbItemsMaxInDirectRelevantDesc[ppt] = max(nbItemForThisNode, nbItemsMaxInDirectRelevantDes)
+            else:
+                node2NbItemsMaxInDirectRelevantDesc[ppt] = nbItemsMaxInDirectRelevantDes
         return candidates
 
     def scoring_fold_change(self, candidates):
@@ -257,10 +310,7 @@ class ExpProposed:
                 score = min(score, 1)
             if score >= 1:
                 result.append((candidate[0], score, self.annotation_counts_dict[candidate[0]], candidate[1], candidate[2], self.get_entity_label(candidate[0])))
-            # if candidate[1] == 1:
-            #     score = min(score, 1)
-            # if score >= 1:
-            #     result.append((candidate[0], score, self.annotation_counts_dict[candidate[0]], candidate[1], candidate[2], self.get_entity_label(candidate[0])))
+
         result.sort(key=lambda x:x[1], reverse=True)
         return result[:self.nb_po]
 
@@ -293,10 +343,10 @@ class ExpProposed:
         results_dict = dict()
         results_cem = dict()
         for rec_item in self.recommended_items:
-            candidates = self.get_candidates_ppts(rec_item)
+            candidates = self.get_candidates_ppts2(rec_item)
             results_dict[rec_item] = self.scoring(candidates)
 
-            results_cem[rec_item] = self.cf_exp_generator(rec_item)
+            # results_cem[rec_item] = self.cf_exp_generator(rec_item)
         return results_dict, results_cem
 
     def get_entity_label(self, entity):

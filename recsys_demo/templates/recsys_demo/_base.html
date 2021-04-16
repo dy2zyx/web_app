@@ -41,7 +41,7 @@
 <body style="position: relative;padding-bottom: 40px;min-height:100vh;">
     <br>
     <header class="navbar navbar-expand-md navbar-dark mb-4" style="background-color:#563d7c;">
-      <a class="navbar-brand" href="{% url 'recsys_demo:index' %}">Home</a>
+      <a class="navbar-brand" href="{% url 'recsys_demo:index' %}">Accueil</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -49,16 +49,16 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <a class="nav-link" href="{%  url 'recsys_demo:movie_rec'  %}">Movie recommendation</a>
+                <a class="nav-link" href="{%  url 'recsys_demo:movie_rec'  %}">Lancer la recommandation</a>
             </li>
             <li class="nav-item inactive">
-                <a class="nav-link text-warning" href="#">Welcome! Logged in user: {{request.session.current_user_metadata.user_first_name}} {{request.session.current_user_metadata.user_last_name}} </a>
+                <a class="nav-link text-warning" href="#">Bienvenue : {{request.session.current_user_metadata.user_first_name}} {{request.session.current_user_metadata.user_last_name}} </a>
             </li>
         </ul>
       <form class="form-inline my-2 my-lg-0" action="/login" >
           {% csrf_token %}
 <!--        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">-->
-        <button class="btn btn-outline-warning my-2 my-sm-0" type="submit" onclick="session_quit()">Quit the session</button>
+        <button class="btn btn-outline-warning my-2 my-sm-0" type="submit" onclick="session_quit()">Déconnexion</button>
       </form>
       </div>
     </header>

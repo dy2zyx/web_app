@@ -9,13 +9,13 @@
 <div style="width: 45%; margin:0 auto;">
     <div class="alert alert-success">
 <!--      <h4 class="alert-heading">How to...</h4>-->
-      <h4 class="mb-0">You have selected the following liked movies. You can either:</h4>
+      <h4 class="mb-0">Vous avez sélectionné les films suivants. Vous pouvez, au choix :</h4>
         <br>
         <ul>
-            <li>Remove movies from the list by clicking the trash icon,</li>
-            <li>Add more movies in your profile by clicking "Add more movies", </li>
-            <li style="list-style-type:none"><b>OR</b></li>
-            <li><p class="mb-0">Get for recommendations. Please verify your selected movies before asking for recommendations.</p></li>
+            <li>Oter certains films de cette liste en cliquant la poubelle,</li>
+            <li>Ajouter de nouveaux films en cliquant sur "ajouter", </li>
+            <li style="list-style-type:none"><b>OU</b></li>
+            <li><p class="mb-0">Si vous estimez que cette liste représente bien vos goûts cinématographiques, lancer la recommandation.</p></li>
         </ul>
     </div>
 </div>
@@ -38,8 +38,8 @@
                   <div class="card-body">
                     <h5 id="m_title" class="card-title text-dark">{{  i_data.0.title }}</h5>
                       <br>
-                      <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>
-                      <a href="{{  i_data.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>
+<!--                      <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
+<!--                      <a href="{{  i_data.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
 <!--                      <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>-->
 <!--                      <p class="card-text">{{  i_data.0.overview  }} </p>-->
                       <h6 class="card-subtitle mb-2 text-info">Release date</h6>
@@ -71,10 +71,10 @@
 {% endif %}
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
     <form action="/movie_rec">
-        <button type="submit" class="btn btn-secondary" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-left fa-lg"></i> Add more movies</button>
+        <button type="submit" class="btn btn-secondary" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-left fa-lg"></i> Ajouter de nouveaux films</button>
     </form>
     <form action="/movie_rec/recommendation">
-        <button type="submit" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Get for recommendations</button>
+        <button type="submit" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Obtenir la recommandation</button>
     </form>
     {% if messages %}
         <ul class="messages list-group-flush">
@@ -85,7 +85,7 @@
     {% endif %}
     <div class="alert alert-success">
 <!--      <h4 class="alert-heading">How to...</h4>-->
-      <h6 class="mb-0">Please verify your selected movies (e.g. delete undesired ones) before asking for recommendations.</h6>
+      <h6 class="mb-0">Attention : Avant de lancer la recommandation, faites une ultime vérification de votre liste de films préférés</h6>
     </div>
 </div>
 </br>

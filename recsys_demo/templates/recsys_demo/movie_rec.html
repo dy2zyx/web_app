@@ -11,12 +11,12 @@
 {% block content %}
 <div style="width: 65%; margin:0 auto;">
     <div class="alert alert-success">
-      <h4 class="alert-heading">How to...</h4>
-      <p class="mb-0">Please select at least 5 movies that you like. You can either:</p>
+      <h4 class="alert-heading">Création du profil</h4>
+      <p class="mb-0">Sélectionnez au minimum 5 films que vous avez particulièrement aimés. Vous pouvez, au choix :</p>
         <ul>
-            <li>Find your desired movies by title using the search bar (recommended).</li>
-            <li style="list-style-type:none"><b>OR</b></li>
-            <li><p class="mb-0">Choose movies from the below randomly generated list.</p></li>
+            <li>Trouver les films correspondants par leur titre en utilisant la barre de recherche (recommandé) ;</li>
+            <li style="list-style-type:none"><b>OU</b></li>
+            <li><p class="mb-0">Le cas échéant, choisir les films parmi ceux de la liste proposée ci-dessous.</p></li>
         </ul>
     </div>
 </div>
@@ -25,7 +25,7 @@
     <form action="/movie_rec"  method="post" id="search_form">
     {%  csrf_token  %}
         <div class="input-group mb-3" style="width: 65%; margin:0 auto;">
-            <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Search among {{nb_movies_in_base}} movies by entering a title" autocomplete="off" spellcheck="false">
+            <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Recherche à partir du titre (en anglais ou en français)" autocomplete="off" spellcheck="false">
                 <span class="input-group-btn">
                     <button id="search_btn" type="submit" class="btn btn-outline-secondary">
                         <i class="fa fa-search"></i>
@@ -43,7 +43,7 @@
 
     {% if movie_info %}
     <div style="width: 65%; margin:0 auto;">
-        <h4 class="mb-2 text-info">User searched movie</h4>
+        <h4 class="mb-2 text-info">Film choisi</h4>
     </div>
     <div class="card mb-3 border-info" style="width: 65%; margin:0 auto;">
       <div class="row no-gutters">
@@ -54,8 +54,8 @@
           <div class="card-body">
             <h5 class="card-title text-dark">{{  movie_info.title }}</h5>
               <br>
-              <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>
-              <a href="{{  movie_info.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>
+<!--              <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
+<!--              <a href="{{  movie_info.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
               <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>
               <p class="card-text">{{  movie_info.overview  }} </p>
               <h6 class="card-subtitle mb-2 text-info">Release date</h6>
@@ -67,7 +67,7 @@
 <!--                      <input id="user_rating" name="movie_rating">-->
                       <div class="input-group-append">
                         <button id="submit_rating" type="submit" class="btn btn-success" onClick='showMessage()'>
-                            <i class="fa fa-check fa-lg"></i> Add to profile
+                            <i class="fa fa-check fa-lg"></i> Ajouter au profil
                         </button>
                       </div>
                   </div>
@@ -80,7 +80,7 @@
     {% endif %}
     {% if random_movies_dict %}
     <div style="width: 65%; margin:0 auto;">
-        <h4 class="mb-2 text-info">Showing randomly displayed movies</h4>
+        <h4 class="mb-2 text-info">Sélection aléatoire</h4>
     </div>
     {% for iid, i_data in random_movies_dict.items %}
         <div class="card mb-3 border-info" style="width: 65%; margin:0 auto;">
@@ -92,8 +92,8 @@
               <div class="card-body">
                 <h5 class="card-title text-dark">{{  i_data.0.title }}</h5>
                   <br>
-                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>
-                  <a href="{{  i_data.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>
+<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
+<!--                  <a href="{{  i_data.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
                   <h6 class="card-subtitle mb-2 text-info">Movie overview</h6>
                   <p class="card-text">{{  i_data.0.overview  }} </p>
                   <h6 class="card-subtitle mb-2 text-info">Release date</h6>
@@ -106,7 +106,7 @@
 <!--                          <input id="user_rating_{{i_data.1}}" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="4" data-size="md">-->
                           <div class="input-group-append">
                             <button id="submit_rating_{{i_data.1}}" type="submit" class="btn btn-success" onClick='showMessage()'>
-                                <i class="fa fa-check fa-lg"></i> Add to profile
+                                <i class="fa fa-check fa-lg"></i> Ajouter au profil
                             </button>
                           </div>
                       </div>
@@ -122,7 +122,7 @@
       {% csrf_token %}
       <div class="input-group-append" style="width: 65%; margin:0 auto;">
         <button id="finish_rating" type="submit" class="btn btn-success" style="max-width: 100%; margin: 0 auto;">
-            <i class="fa fa-arrow-circle-right fa-lg"></i> Finish rating
+            <i class="fa fa-arrow-circle-right fa-lg"></i> Valider la sélection
         </button>
       </div>
     </form>

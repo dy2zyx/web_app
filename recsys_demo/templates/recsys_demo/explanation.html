@@ -7,18 +7,30 @@
 {% block title %}Explantions of recommendations{% endblock title %}
 {% block content %}
 <div style="max-width: 60%; margin:0 auto;">
-    <h4 class="mb-2 text-info" style="text-align: center;">Evaluate explanations for lists of recommendations.</h4>
+    <h4 class="mb-2 text-info" style="text-align: center;">Voici maintenant une liste de 5 films qui correspondent à votre profil.</h4>
 </div>
+
+<!--<div style="width: 45%; margin:0 auto;">-->
+<!--    <div class="alert alert-success">-->
+<!--      <h4 class="alert-heading">How to...</h4>-->
+<!--      <p class="mb-0">For each group of recommendations and each of recommended movies (same border color), we provide you with 3 different explanation styles (left, middle and right). You are asked to:</p>-->
+<!--        <ul>-->
+<!--            <li>1. Read the explanations of the recommendation,</li>-->
+<!--            <li>2. Rate each explanation (1 - 5 stars),</li>-->
+<!--            <li>3. Filling the corresponding questionnaires. </li>-->
+<!--        </ul>-->
+<!--    </div>-->
+<!--</div>-->
 
 <div style="width: 45%; margin:0 auto;">
     <div class="alert alert-success">
-      <h4 class="alert-heading">How to...</h4>
-      <p class="mb-0">For each group of recommendations and each of recommended movies (same border color), we provide you with 3 different explanation styles (left, middle and right). You are asked to:</p>
-        <ul>
-            <li>1. Read the explanations of the recommendation,</li>
-            <li>2. Rate each explanation (1 - 5 stars),</li>
-            <li>3. Filling the corresponding questionnaires. </li>
-        </ul>
+<!--      <h4 class="alert-heading">How to...</h4>-->
+      <p class="mb-0">Nous vous demandons d'évaluer cette liste en répondant au questionnaire en bas de la page.</p>
+<!--        <ul>-->
+<!--            <li>1. Read the explanation of the movie,</li>-->
+<!--            <li>2. Rate the explanation (1 - 5 stars),</li>-->
+<!--            <li>3. Fill the questionnaire. </li>-->
+<!--        </ul>-->
     </div>
 </div>
 <br>
@@ -27,138 +39,138 @@
 <div class="row">
 
 <div class="col">
-    <div class="alert alert-success">
-        <h5 class="alert-heading">Explanation Style 1</h5>
-    </div>
+<!--    <div class="alert alert-success">-->
+<!--        <h5 class="alert-heading">Explanation Style 1</h5>-->
+<!--    </div>-->
     {% for iid, i_data in rec_dicts.0.items %}
-    <div class="card mb-3 border-info" style="width: 100%; margin:0 auto;">
+    <div class="card mb-3 border-info" style="width: 90%; margin:0 auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
-          <img src="{{ i_data.explod.0.poster_path }}" class="card-img">
+          <img src="{{ i_data.exp_style.0.poster_path }}" class="card-img">
         </div>
         <div class="col-md-8">
           <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.explod.0.title }}</h5>
+            <h5 class="card-title text-dark">{{  i_data.exp_style.0.title }}</h5>
               <br>
 <!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
 <!--                  <a href="{{  i_data.explod.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
               <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.explod.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.explod.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_cbf_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
+              <p class="card-text">{{  i_data.exp_style.0.release_date  }} </p>
+              <h6 class="card-subtitle mb-2 text-info">Explanation for the movie</h6>
+              <p class="card-text">{{  i_data.exp_style.1|safe  }} </p>
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">How much you like this explanation?</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
           </div>
         </div>
       </div>
     </div>
     {% endfor %}
-<hr class="sep-2" />
-    {% for iid, i_data in rec_dicts.1.items %}
-    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">
-      <div class="row no-gutters">
-        <div class="col-md-4">
-          <img src="{{ i_data.explod.0.poster_path }}" class="card-img">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.explod.0.title }}</h5>
-              <br>
-<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
-<!--                  <a href="{{  i_data.explod.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
-              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.explod.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.explod.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_svd_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-<hr class="sep-2" />
-    {% for iid, i_data in rec_dicts.2.items %}
-    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">
-      <div class="row no-gutters">
-        <div class="col-md-4">
-          <img src="{{ i_data.explod.0.poster_path }}" class="card-img">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.explod.0.title }}</h5>
-              <br>
-<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
-<!--                  <a href="{{  i_data.explod.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
-              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.explod.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.explod.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_hybrid_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
+<!--<hr class="sep-2" />-->
+<!--    {% for iid, i_data in rec_dicts.1.items %}-->
+<!--    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-4">-->
+<!--          <img src="{{ i_data.explod.0.poster_path }}" class="card-img">-->
+<!--        </div>-->
+<!--        <div class="col-md-8">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title text-dark">{{  i_data.explod.0.title }}</h5>-->
+<!--              <br>-->
+<!--&lt;!&ndash;                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>&ndash;&gt;-->
+<!--&lt;!&ndash;                  <a href="{{  i_data.explod.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>&ndash;&gt;-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
+<!--              <p class="card-text">{{  i_data.explod.0.release_date  }} </p>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>-->
+<!--              <p class="card-text">{{  i_data.explod.1|safe  }} </p>-->
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_svd_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    {% endfor %}-->
+<!--<hr class="sep-2" />-->
+<!--    {% for iid, i_data in rec_dicts.2.items %}-->
+<!--    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-4">-->
+<!--          <img src="{{ i_data.explod.0.poster_path }}" class="card-img">-->
+<!--        </div>-->
+<!--        <div class="col-md-8">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title text-dark">{{  i_data.explod.0.title }}</h5>-->
+<!--              <br>-->
+<!--&lt;!&ndash;                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>&ndash;&gt;-->
+<!--&lt;!&ndash;                  <a href="{{  i_data.explod.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>&ndash;&gt;-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
+<!--              <p class="card-text">{{  i_data.explod.0.release_date  }} </p>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>-->
+<!--              <p class="card-text">{{  i_data.explod.1|safe  }} </p>-->
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_hybrid_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    {% endfor %}-->
 
 <!--<div style="max-width: 60%; margin:0 auto;">-->
 <!--    <h4 class="mb-2 text-info" style="text-align: center;">Please fill the questionnaire below</h4>-->
 <!--</div>-->
 
-<div class="card mb-3 border-dark" style="width: 100%; margin:0 auto;">
+<div class="card mb-3 border-dark" style="width: 90%; margin:0 auto;">
   <div class="row no-gutters">
     <div class="col-md-8">
       <div class="card-body">
         <h5 class="card-title text-dark">Questionnaire</h5>
           <br>
-          <h6 class="card-subtitle mb-2 text-dark">I understood why these groups of movies were recommended to me.</h6>
-          <form method="post" id="rating_form_Q2_explod">
+          <h6 class="card-subtitle mb-2 text-dark">Je comprends pourquoi ces 5 films m'ont été recommandés.</h6>
+          <form method="post" id="rating_form_Q2">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q2_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q2_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation made all the recommendations more convincing</h6>
-          <form method="post" id="rating_form_Q3_explod">
+          <h6 class="card-subtitle mb-2 text-dark">Les explications fournies sont convaincantes.</h6>
+          <form method="post" id="rating_form_Q3">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q3_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q3_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation helped me discover new information about all these movies</h6>
-          <form method="post" id="rating_form_Q4_explod">
+          <h6 class="card-subtitle mb-2 text-dark">Ces explications m'ont permis de découvrir certaines informations sur les films recommandés.</h6>
+          <form method="post" id="rating_form_Q4">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q4_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q4_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation increased my trust in the recommender system</h6>
-          <form method="post" id="rating_form_Q5_explod">
+          <h6 class="card-subtitle mb-2 text-dark">Les explications fournies augmentent ma confiance dans le système de recommandation.</h6>
+          <form method="post" id="rating_form_Q5">
               {% csrf_token %}
               <div class="pt-3">
-                  <input id="user_rating_Q5_explod_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  <input id="user_rating_Q5_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
               </div>
           </form>
           <hr/>
@@ -168,294 +180,294 @@
  </div>
 </div>
 
-<div class="col">
-    <div class="alert alert-success">
-        <h5 class="alert-heading">Explanation Style 2</h5>
-    </div>
-    {% for iid, i_data in rec_dicts.0.items %}
-    <div class="card mb-3 border-info" style="width: 100%; margin:0 auto;">
-      <div class="row no-gutters">
-        <div class="col-md-4">
-          <img src="{{ i_data.pem.0.poster_path }}" class="card-img">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.pem.0.title }}</h5>
-              <br>
-<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
-<!--                  <a href="{{  i_data.pem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
-              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.pem.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.pem.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_cbf_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-<hr class="sep-2" />
-    {% for iid, i_data in rec_dicts.1.items %}
-    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">
-      <div class="row no-gutters">
-        <div class="col-md-4">
-          <img src="{{ i_data.pem.0.poster_path }}" class="card-img">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.pem.0.title }}</h5>
-              <br>
-<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
-<!--                  <a href="{{  i_data.pem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
-              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.pem.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.pem.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_svd_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-<hr class="sep-2" />
-    {% for iid, i_data in rec_dicts.2.items %}
-    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">
-      <div class="row no-gutters">
-        <div class="col-md-4">
-          <img src="{{ i_data.pem.0.poster_path }}" class="card-img">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.pem.0.title }}</h5>
-              <br>
-<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
-<!--                  <a href="{{  i_data.pem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
-              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.pem.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.pem.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_hybrid_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
+<!--<div class="col">-->
+<!--    <div class="alert alert-success">-->
+<!--        <h5 class="alert-heading">Explanation Style 2</h5>-->
+<!--    </div>-->
+<!--    {% for iid, i_data in rec_dicts.0.items %}-->
+<!--    <div class="card mb-3 border-info" style="width: 100%; margin:0 auto;">-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-4">-->
+<!--          <img src="{{ i_data.pem.0.poster_path }}" class="card-img">-->
+<!--        </div>-->
+<!--        <div class="col-md-8">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title text-dark">{{  i_data.pem.0.title }}</h5>-->
+<!--              <br>-->
+<!--&lt;!&ndash;                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>&ndash;&gt;-->
+<!--&lt;!&ndash;                  <a href="{{  i_data.pem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>&ndash;&gt;-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
+<!--              <p class="card-text">{{  i_data.pem.0.release_date  }} </p>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>-->
+<!--              <p class="card-text">{{  i_data.pem.1|safe  }} </p>-->
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_cbf_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    {% endfor %}-->
+<!--<hr class="sep-2" />-->
+<!--    {% for iid, i_data in rec_dicts.1.items %}-->
+<!--    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-4">-->
+<!--          <img src="{{ i_data.pem.0.poster_path }}" class="card-img">-->
+<!--        </div>-->
+<!--        <div class="col-md-8">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title text-dark">{{  i_data.pem.0.title }}</h5>-->
+<!--              <br>-->
+<!--&lt;!&ndash;                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>&ndash;&gt;-->
+<!--&lt;!&ndash;                  <a href="{{  i_data.pem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>&ndash;&gt;-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
+<!--              <p class="card-text">{{  i_data.pem.0.release_date  }} </p>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>-->
+<!--              <p class="card-text">{{  i_data.pem.1|safe  }} </p>-->
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_svd_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    {% endfor %}-->
+<!--<hr class="sep-2" />-->
+<!--    {% for iid, i_data in rec_dicts.2.items %}-->
+<!--    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-4">-->
+<!--          <img src="{{ i_data.pem.0.poster_path }}" class="card-img">-->
+<!--        </div>-->
+<!--        <div class="col-md-8">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title text-dark">{{  i_data.pem.0.title }}</h5>-->
+<!--              <br>-->
+<!--&lt;!&ndash;                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>&ndash;&gt;-->
+<!--&lt;!&ndash;                  <a href="{{  i_data.pem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>&ndash;&gt;-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
+<!--              <p class="card-text">{{  i_data.pem.0.release_date  }} </p>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>-->
+<!--              <p class="card-text">{{  i_data.pem.1|safe  }} </p>-->
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_hybrid_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    {% endfor %}-->
 
-<!--<div style="max-width: 60%; margin:0 auto;">-->
-<!--    <h4 class="mb-2 text-info" style="text-align: center;">Please fill the questionnaire below</h4>-->
+<!--&lt;!&ndash;<div style="max-width: 60%; margin:0 auto;">&ndash;&gt;-->
+<!--&lt;!&ndash;    <h4 class="mb-2 text-info" style="text-align: center;">Please fill the questionnaire below</h4>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
+
+<!--<div class="card mb-3 border-dark" style="width: 100%; margin:0 auto;">-->
+<!--  <div class="row no-gutters">-->
+<!--    <div class="col-md-8">-->
+<!--      <div class="card-body">-->
+<!--        <h5 class="card-title text-dark">Questionnaire</h5>-->
+<!--          <br>-->
+<!--          <h6 class="card-subtitle mb-2 text-dark">I understood why these groups of movies were recommended to me.</h6>-->
+<!--          <form method="post" id="rating_form_Q2_pem">-->
+<!--              {% csrf_token %}-->
+<!--              <div class="pt-3">-->
+<!--                  <input id="user_rating_Q2_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--              </div>-->
+<!--          </form>-->
+<!--          <hr/>-->
+<!--          <h6 class="card-subtitle mb-2 text-dark">The explanation made all the recommendations more convincing</h6>-->
+<!--          <form method="post" id="rating_form_Q3_pem">-->
+<!--              {% csrf_token %}-->
+<!--              <div class="pt-3">-->
+<!--                  <input id="user_rating_Q3_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--              </div>-->
+<!--          </form>-->
+<!--          <hr/>-->
+<!--          <h6 class="card-subtitle mb-2 text-dark">The explanation helped me discover new information about all these movies</h6>-->
+<!--          <form method="post" id="rating_form_Q4_pem">-->
+<!--              {% csrf_token %}-->
+<!--              <div class="pt-3">-->
+<!--                  <input id="user_rating_Q4_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--              </div>-->
+<!--          </form>-->
+<!--          <hr/>-->
+<!--          <h6 class="card-subtitle mb-2 text-dark">The explanation increased my trust in the recommender system</h6>-->
+<!--          <form method="post" id="rating_form_Q5_pem">-->
+<!--              {% csrf_token %}-->
+<!--              <div class="pt-3">-->
+<!--                  <input id="user_rating_Q5_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--              </div>-->
+<!--          </form>-->
+<!--          <hr/>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!-- </div>-->
 <!--</div>-->
 
-<div class="card mb-3 border-dark" style="width: 100%; margin:0 auto;">
-  <div class="row no-gutters">
-    <div class="col-md-8">
-      <div class="card-body">
-        <h5 class="card-title text-dark">Questionnaire</h5>
-          <br>
-          <h6 class="card-subtitle mb-2 text-dark">I understood why these groups of movies were recommended to me.</h6>
-          <form method="post" id="rating_form_Q2_pem">
-              {% csrf_token %}
-              <div class="pt-3">
-                  <input id="user_rating_Q2_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-              </div>
-          </form>
-          <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation made all the recommendations more convincing</h6>
-          <form method="post" id="rating_form_Q3_pem">
-              {% csrf_token %}
-              <div class="pt-3">
-                  <input id="user_rating_Q3_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-              </div>
-          </form>
-          <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation helped me discover new information about all these movies</h6>
-          <form method="post" id="rating_form_Q4_pem">
-              {% csrf_token %}
-              <div class="pt-3">
-                  <input id="user_rating_Q4_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-              </div>
-          </form>
-          <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation increased my trust in the recommender system</h6>
-          <form method="post" id="rating_form_Q5_pem">
-              {% csrf_token %}
-              <div class="pt-3">
-                  <input id="user_rating_Q5_pem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-              </div>
-          </form>
-          <hr/>
-      </div>
-    </div>
-  </div>
- </div>
-</div>
+<!--<div class="col">-->
+<!--    <div class="alert alert-success">-->
+<!--        <h5 class="alert-heading">Explanation Style 3</h5>-->
+<!--    </div>-->
+<!--    {% for iid, i_data in rec_dicts.0.items %}-->
+<!--    <div class="card mb-3 border-info" style="width: 100%; margin:0 auto;">-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-4">-->
+<!--          <img src="{{ i_data.cem.0.poster_path }}" class="card-img">-->
+<!--        </div>-->
+<!--        <div class="col-md-8">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title text-dark">{{  i_data.cem.0.title }}</h5>-->
+<!--              <br>-->
+<!--&lt;!&ndash;                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>&ndash;&gt;-->
+<!--&lt;!&ndash;                  <a href="{{  i_data.cem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>&ndash;&gt;-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
+<!--              <p class="card-text">{{  i_data.cem.0.release_date  }} </p>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>-->
+<!--              <p class="card-text">{{  i_data.cem.1|safe  }} </p>-->
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_cbf_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    {% endfor %}-->
+<!--<hr class="sep-2" />-->
+<!--    {% for iid, i_data in rec_dicts.1.items %}-->
+<!--    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-4">-->
+<!--          <img src="{{ i_data.cem.0.poster_path }}" class="card-img">-->
+<!--        </div>-->
+<!--        <div class="col-md-8">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title text-dark">{{  i_data.cem.0.title }}</h5>-->
+<!--              <br>-->
+<!--&lt;!&ndash;                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>&ndash;&gt;-->
+<!--&lt;!&ndash;                  <a href="{{  i_data.cem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>&ndash;&gt;-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
+<!--              <p class="card-text">{{  i_data.cem.0.release_date  }} </p>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>-->
+<!--              <p class="card-text">{{  i_data.cem.1|safe  }} </p>-->
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_svd_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    {% endfor %}-->
+<!--<hr class="sep-2" />-->
+<!--    {% for iid, i_data in rec_dicts.2.items %}-->
+<!--    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">-->
+<!--      <div class="row no-gutters">-->
+<!--        <div class="col-md-4">-->
+<!--          <img src="{{ i_data.cem.0.poster_path }}" class="card-img">-->
+<!--        </div>-->
+<!--        <div class="col-md-8">-->
+<!--          <div class="card-body">-->
+<!--            <h5 class="card-title text-dark">{{  i_data.cem.0.title }}</h5>-->
+<!--              <br>-->
+<!--&lt;!&ndash;                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>&ndash;&gt;-->
+<!--&lt;!&ndash;                  <a href="{{  i_data.cem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>&ndash;&gt;-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Release date</h6>-->
+<!--              <p class="card-text">{{  i_data.cem.0.release_date  }} </p>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>-->
+<!--              <p class="card-text">{{  i_data.cem.1|safe  }} </p>-->
+<!--              <hr/>-->
+<!--              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>-->
+<!--              <form method="post" id="rating_form_Q1">-->
+<!--                  {% csrf_token %}-->
+<!--                  <div class="pt-3">-->
+<!--                      <input id="Q1_{{iid}}_hybrid_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--                  </div>-->
+<!--              </form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    {% endfor %}-->
 
-<div class="col">
-    <div class="alert alert-success">
-        <h5 class="alert-heading">Explanation Style 3</h5>
-    </div>
-    {% for iid, i_data in rec_dicts.0.items %}
-    <div class="card mb-3 border-info" style="width: 100%; margin:0 auto;">
-      <div class="row no-gutters">
-        <div class="col-md-4">
-          <img src="{{ i_data.cem.0.poster_path }}" class="card-img">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.cem.0.title }}</h5>
-              <br>
-<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
-<!--                  <a href="{{  i_data.cem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
-              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.cem.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.cem.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_cbf_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-<hr class="sep-2" />
-    {% for iid, i_data in rec_dicts.1.items %}
-    <div class="card mb-3 border-danger" style="width: 100%; margin:0 auto;">
-      <div class="row no-gutters">
-        <div class="col-md-4">
-          <img src="{{ i_data.cem.0.poster_path }}" class="card-img">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.cem.0.title }}</h5>
-              <br>
-<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
-<!--                  <a href="{{  i_data.cem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
-              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.cem.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.cem.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_svd_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-<hr class="sep-2" />
-    {% for iid, i_data in rec_dicts.2.items %}
-    <div class="card mb-3 border-warning" style="width: 100%; margin:0 auto;">
-      <div class="row no-gutters">
-        <div class="col-md-4">
-          <img src="{{ i_data.cem.0.poster_path }}" class="card-img">
-        </div>
-        <div class="col-md-8">
-          <div class="card-body">
-            <h5 class="card-title text-dark">{{  i_data.cem.0.title }}</h5>
-              <br>
-<!--                  <h6 class="card-subtitle mb-2 text-info">Dbpedia link</h6>-->
-<!--                  <a href="{{  i_data.cem.0.dbpedia_uri  }}" class="card-text" target="_blank"> See the movie at DBpedia</a>-->
-              <h6 class="card-subtitle mb-2 text-info">Release date</h6>
-              <p class="card-text">{{  i_data.cem.0.release_date  }} </p>
-              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
-              <p class="card-text">{{  i_data.cem.1|safe  }} </p>
-              <hr/>
-              <h6 class="card-subtitle mb-2 text-info">Rate the explanation (Please first read it!)</h6>
-              <form method="post" id="rating_form_Q1">
-                  {% csrf_token %}
-                  <div class="pt-3">
-                      <input id="Q1_{{iid}}_hybrid_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-                  </div>
-              </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
+<!--&lt;!&ndash;<div style="max-width: 60%; margin:0 auto;">&ndash;&gt;-->
+<!--&lt;!&ndash;    <h4 class="mb-2 text-info" style="text-align: center;">Please fill the questionnaire below</h4>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
 
-<!--<div style="max-width: 60%; margin:0 auto;">-->
-<!--    <h4 class="mb-2 text-info" style="text-align: center;">Please fill the questionnaire below</h4>-->
+<!--<div class="card mb-3 border-dark" style="width: 100%; margin:0 auto;">-->
+<!--  <div class="row no-gutters">-->
+<!--    <div class="col-md-8">-->
+<!--      <div class="card-body">-->
+<!--        <h5 class="card-title text-dark">Questionnaire</h5>-->
+<!--          <br>-->
+<!--          <h6 class="card-subtitle mb-2 text-dark">I understood why these groups of movies were recommended to me.</h6>-->
+<!--          <form method="post" id="rating_form_Q2_cem">-->
+<!--              {% csrf_token %}-->
+<!--              <div class="pt-3">-->
+<!--                  <input id="user_rating_Q2_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--              </div>-->
+<!--          </form>-->
+<!--          <hr/>-->
+<!--          <h6 class="card-subtitle mb-2 text-dark">The explanation made all the recommendations more convincing</h6>-->
+<!--          <form method="post" id="rating_form_Q3_cem">-->
+<!--              {% csrf_token %}-->
+<!--              <div class="pt-3">-->
+<!--                  <input id="user_rating_Q3_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--              </div>-->
+<!--          </form>-->
+<!--          <hr/>-->
+<!--          <h6 class="card-subtitle mb-2 text-dark">The explanation helped me discover new information about all these movies</h6>-->
+<!--          <form method="post" id="rating_form_Q4_cem">-->
+<!--              {% csrf_token %}-->
+<!--              <div class="pt-3">-->
+<!--                  <input id="user_rating_Q4_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--              </div>-->
+<!--          </form>-->
+<!--          <hr/>-->
+<!--          <h6 class="card-subtitle mb-2 text-dark">The explanation increased my trust in the recommender system</h6>-->
+<!--          <form method="post" id="rating_form_Q5_cem">-->
+<!--              {% csrf_token %}-->
+<!--              <div class="pt-3">-->
+<!--                  <input id="user_rating_Q5_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
+<!--              </div>-->
+<!--          </form>-->
+<!--          <hr/>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!-- </div>-->
 <!--</div>-->
-
-<div class="card mb-3 border-dark" style="width: 100%; margin:0 auto;">
-  <div class="row no-gutters">
-    <div class="col-md-8">
-      <div class="card-body">
-        <h5 class="card-title text-dark">Questionnaire</h5>
-          <br>
-          <h6 class="card-subtitle mb-2 text-dark">I understood why these groups of movies were recommended to me.</h6>
-          <form method="post" id="rating_form_Q2_cem">
-              {% csrf_token %}
-              <div class="pt-3">
-                  <input id="user_rating_Q2_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-              </div>
-          </form>
-          <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation made all the recommendations more convincing</h6>
-          <form method="post" id="rating_form_Q3_cem">
-              {% csrf_token %}
-              <div class="pt-3">
-                  <input id="user_rating_Q3_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-              </div>
-          </form>
-          <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation helped me discover new information about all these movies</h6>
-          <form method="post" id="rating_form_Q4_cem">
-              {% csrf_token %}
-              <div class="pt-3">
-                  <input id="user_rating_Q4_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-              </div>
-          </form>
-          <hr/>
-          <h6 class="card-subtitle mb-2 text-dark">The explanation increased my trust in the recommender system</h6>
-          <form method="post" id="rating_form_Q5_cem">
-              {% csrf_token %}
-              <div class="pt-3">
-                  <input id="user_rating_Q5_cem_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
-              </div>
-          </form>
-          <hr/>
-      </div>
-    </div>
-  </div>
- </div>
-</div>
 </div>
 {% endif %}
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
     <form action="/thanks">
-        <button type="submit" id="feedback_exp1" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Submit </button>
+        <button type="submit" id="feedback_exp1" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Valider l'évaluation </button>
     </form>
 </div>
 

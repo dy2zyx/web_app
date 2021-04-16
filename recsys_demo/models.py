@@ -37,9 +37,16 @@ class UserInfo(models.Model):
     ]
 
     sex = models.CharField(choices=sex, default=None, max_length=20, null=True)
+
+    algo_config = models.CharField(max_length=50, default="Nothing yet")
+    exp_style_config = models.CharField(max_length=50, default="Nothing yet")
+
     feed_back_top_1 = models.CharField(max_length=10000, default="Nothing yet")
     feed_back_re_top_1 = models.CharField(max_length=10000, default="Nothing yet")
     feed_back_list = models.CharField(max_length=10000, default="Nothing yet")
+
+    num_exp_top_1 = models.CharField(max_length=50, default="Nothing yet")
+    num_exp_top_5_list = models.CharField(max_length=50, default="Nothing yet")
 
     def get_absolute_url(self):
         return reverse('index')
