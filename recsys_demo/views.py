@@ -88,6 +88,8 @@ def movierec_view(request):
         form = MovieTitleForm(request.POST)
         if form.is_valid():
             user_input = form.cleaned_data['movie_title']
+            if not user_input in movie_titles:
+                return HttpResponseRedirect('movie_rec')
             movie_id = [iid for iid in movies.keys() if ('title', user_input) in movies[iid].items()][0]
             movie_info = movies[movie_id]
             user_inputs.append(movie_id)
@@ -97,7 +99,7 @@ def movierec_view(request):
             return render(request, template_name, context=context)
         else:
             print(form.errors.as_data())
-            return render(request, template_name, {'form': form, 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
+            return HttpResponseRedirect('movie_rec')
     return render(request, template_name=template_name, context={'nb_movies_in_base': "{:,}".format(len(movies.keys())), 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
 
 
