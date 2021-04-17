@@ -109,8 +109,10 @@ def profil_view(request):
     if request.is_ajax():
         removed_movie_id = request.POST.get('removed_movie_id')
         print(removed_movie_id)
-        del request.session['user_inputs_ratings'][str(removed_movie_id)]
-        del user_inputs_ratings[str(removed_movie_id)]
+        # del request.session['user_inputs_ratings'][str(removed_movie_id)]
+        # del user_inputs_ratings[str(removed_movie_id)]
+        request.session['user_inputs_ratings'].pop(str(removed_movie_id), None)
+        user_inputs_ratings.pop(str(removed_movie_id), None)
         request.session.modified = True
 
     if not 'user_inputs_ratings' in request.session.keys():
