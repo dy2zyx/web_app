@@ -15,7 +15,7 @@
           <li style="list-style-type:none">2. Après avoir consulté les recommandations qui vous sont faites, laissez-vous guider en répondant aux questions qui vous sont proposées</li>
       </ul>
       <p>La durée totale de cette évaluation ne devrait pas excéder 15 minutes.
-          Alors... prêt ? Vous pouvez commencer en sélectionnant l'onglet "Lancer la recommandation" !</p>
+          Alors... prêt ? Vous pouvez commencer en cliquant sur le bouton "Commencer" !</p>
   </div>
 
 <!--    <div class="row">-->
@@ -23,4 +23,10 @@
 <!--        <img src="{% static 'recsys_demo/img/manga.jpg' %}" class="img-fluid col-xs-4 col-md-3" style="width:60%"  alt="movies"/>-->
 <!--    </div>-->
 </header>
+
+<div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
+    <form action="/movie_rec">
+        <button type="submit" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Commencer </button>
+    </form>
+</div>
 {% endblock content %}

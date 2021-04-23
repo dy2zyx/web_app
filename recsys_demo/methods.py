@@ -12,25 +12,6 @@ movies = dict()
 iid_uri_dict = dict()
 uri_iid_dict = dict()
 
-# PROPERTIE_LABEL_DICT = {
-#     'http://purl.org/dc/terms/subject': 'category',
-#     'http://dbpedia.org/ontology/musicComposer': 'music composer',
-#     'http://dbpedia.org/ontology/starring': 'actor',
-#     'http://dbpedia.org/ontology/director': 'director',
-#     'http://dbpedia.org/ontology/distributor': 'distributor',
-#     'http://dbpedia.org/ontology/writer': 'writer',
-#     'http://dbpedia.org/ontology/producer': 'producer',
-#     'http://dbpedia.org/ontology/cinematography': 'cinematography',
-#     'http://dbpedia.org/ontology/editing': 'editing',
-#     'http://dbpedia.org/property/starring': 'actor',
-#     'http://dbpedia.org/property/musicComposer': 'music composer',
-#     'http://dbpedia.org/property/director': 'director',
-#     'http://dbpedia.org/property/distributor': 'distributor',
-#     'http://dbpedia.org/property/writer': 'writer',
-#     'http://dbpedia.org/property/producer': 'producer',
-#     'http://dbpedia.org/property/cinematography': 'cinematography',
-#     'http://dbpedia.org/property/editing': 'editing',
-# }
 
 def init():
     with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/dict_item_emb_v5.pickle'), 'rb') as file:

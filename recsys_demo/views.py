@@ -16,21 +16,10 @@ from django.views.decorators.cache import cache_page
 from django.conf import settings
 from .models import UserInfo
 
-user_inputs_ratings = dict()
-user_inputs = list()
 init()
 parse_movie_metadata()
 movie_titles = [movies[m_id]['title'] for m_id in movies.keys()]
-random_movie_ids = random.sample(movies.keys(), k=10)
-random_movies_dict = dict()
-random_movie_id_dict = dict()
-compteur = 0
 _NB_REC = 5
-
-for m_id in random_movie_ids:
-    random_movies_dict[m_id] = (movies[m_id], compteur)
-    random_movie_id_dict[compteur] = m_id
-    compteur += 1
 
 
 class UserLoginView(CreateView):
@@ -48,9 +37,27 @@ class UserLoginView(CreateView):
                    'user_last_name': self.object.last_name,
                    'user_id': self.object.id}
         self.request.session['current_user_metadata'] = context
+        self.request.session['user_inputs_ratings'] = dict()
+        self.request.session['user_inputs'] = list()
+        self.request.session['random_movie_ids'] = random.sample(movies.keys(), k=10)
+        self.request.session['random_movies_dict'] = dict()
+        self.request.session['random_movie_id_dict'] = dict()
 
+        # user_inputs = list()
+        # user_inputs_ratings = dict()
+        # random_movie_ids = random.sample(movies.keys(), k=10)
+        # random_movies_dict = dict()
+        # random_movie_id_dict = dict()
+        compteur = 0
+        for m_id in self.request.session['random_movie_ids']:
+            self.request.session['random_movies_dict'][m_id] = (movies[m_id], compteur)
+            self.request.session['random_movie_id_dict'][compteur] = m_id
+            compteur += 1
+        # for m_id in random_movie_ids:
+        #     random_movies_dict[m_id] = (movies[m_id], compteur)
+        #     random_movie_id_dict[compteur] = m_id
+        #     compteur += 1
         # print(self.request.session.keys())
-        # print(self.object.first_name)
         return HttpResponseRedirect('index')
         # return render(self.request, 'recsys_demo/index.html', context=context)
 
@@ -77,8 +84,9 @@ def movierec_view(request):
         # input_rating = request.POST.get('data_dict[movie_rating]')
         input_rating = 5
         if not input_iid is None:
-            user_inputs_ratings[input_iid] = input_rating
-            request.session['user_inputs_ratings'] = user_inputs_ratings
+            # user_inputs_ratings[input_iid] = input_rating
+            request.session['user_inputs_ratings'][input_iid] = input_rating
+            request.session.modified = True
             print(request.session['user_inputs_ratings'])
             response = HttpResponse(input_rating, content_type="text/html")
             return response
@@ -93,15 +101,16 @@ def movierec_view(request):
                 return HttpResponseRedirect('movie_rec')
             movie_id = [iid for iid in movies.keys() if ('title', user_input) in movies[iid].items()][0]
             movie_info = movies[movie_id]
-            user_inputs.append(movie_id)
-            request.session['user_inputs'] = user_inputs
+            request.session['user_inputs'].append(movie_id)
+            request.session.modified = True
+            # request.session['user_inputs'] = user_inputs
             context = {'user_input': user_input, 'movie_titles': movie_titles, 'movie_info': movie_info,
-                       'movie_id': movie_id, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict}
+                       'movie_id': movie_id, 'random_movies_dict': request.session['random_movies_dict'], 'random_movie_id_dict': request.session['random_movie_id_dict']}
             return render(request, template_name, context=context)
         else:
             print(form.errors.as_data())
             return HttpResponseRedirect('movie_rec')
-    return render(request, template_name=template_name, context={'nb_movies_in_base': "{:,}".format(len(movies.keys())), 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
+    return render(request, template_name=template_name, context={'nb_movies_in_base': "{:,}".format(len(movies.keys())), 'movie_titles': movie_titles, 'random_movies_dict': request.session['random_movies_dict'], 'random_movie_id_dict': request.session['random_movie_id_dict']})
 
 
 @csrf_exempt
@@ -114,10 +123,11 @@ def profil_view(request):
         # del request.session['user_inputs_ratings'][str(removed_movie_id)]
         # del user_inputs_ratings[str(removed_movie_id)]
         request.session['user_inputs_ratings'].pop(str(removed_movie_id), None)
-        user_inputs_ratings.pop(str(removed_movie_id), None)
+        # user_inputs_ratings.pop(str(removed_movie_id), None)
         request.session.modified = True
 
     if not 'user_inputs_ratings' in request.session.keys():
+        print("here")
         return render(request, template_name=template_name, context={'nb_item': 0})
     else:
         data_dict = dict()
