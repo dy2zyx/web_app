@@ -208,15 +208,15 @@ def generate_exp_from_pattern_pem(pattern):
             movies_exp = " movies" if len(items_profile) > 1 else " movie"
 
             if len(items_profile) == 1:
-                m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>"
+                m_titles_exp = "<i>" + movies[items_profile[0]]['title'] + "</i>"
             elif len(items_profile) == 2:
-                m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>" + " and " + "<b>" + movies[items_profile[1]]['title'] + "</b>"
+                m_titles_exp = "<i>" + movies[items_profile[0]]['title'] + "</i>" + " and " + "<i>" + movies[items_profile[1]]['title'] + "</i>"
             else:
                 m_titles_exp = ""
                 for m in items_profile[:(len(items_profile) - 2)]:
-                    m_titles_exp += "<b>" + movies[m]['title'] + "</b>" + ", "
-                m_titles_exp = "<b>" + movies[items_profile[-2]]['title'] + "</b>" + " and " + "<b>" + movies[items_profile[-1]]['title'] + "</b>"
-            explanation += " you " + random.choice(['love', 'like', 'prefer']) + movies_exp + " whose " + random.choice(['category', 'genre']) + " is " + "<i>" + str(ppt) + "</i>" + " as " + m_titles_exp + "."
+                    m_titles_exp += "<i>" + movies[m]['title'] + "</i>" + ", "
+                m_titles_exp = "<i>" + movies[items_profile[-2]]['title'] + "</i>" + " and " + "<i>" + movies[items_profile[-1]]['title'] + "</i>"
+            explanation += " you " + random.choice(['love', 'like', 'prefer']) + movies_exp + " whose " + random.choice(['category', 'genre']) + " is " + "<b>" + str(ppt) + "</b>" + " as " + m_titles_exp + "."
             count += 1
         return explanation
 
@@ -239,15 +239,15 @@ def generate_exp_from_pattern_explod(pattern):
             movies_exp = " movies" if len(items_profile) > 1 else " movie"
 
             if len(items_profile) == 1:
-                m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>"
+                m_titles_exp = "<i>" + movies[items_profile[0]]['title'] + "</i>"
             elif len(items_profile) == 2:
-                m_titles_exp = "<b>" + movies[items_profile[0]]['title'] + "</b>" + " and " + "<b>" + movies[items_profile[1]]['title'] + "</b>"
+                m_titles_exp = "<i>" + movies[items_profile[0]]['title'] + "</i>" + " and " + "<i>" + movies[items_profile[1]]['title'] + "</i>"
             else:
                 m_titles_exp = ""
                 for m in items_profile[:(len(items_profile) - 2)]:
-                    m_titles_exp += "<b>" + movies[m]['title'] + "</b>" + ", "
-                m_titles_exp = "<b>" + movies[items_profile[-2]]['title'] + "</b>" + " and " + "<b>" + movies[items_profile[-1]]['title'] + "</b>"
-            explanation += " you " + random.choice(['love', 'like', 'prefer']) + movies_exp + " whose " + random.choice(['category', 'genre']) + " is " + "<i>" + str(ppt) + "</i>" + " as " + m_titles_exp + "."
+                    m_titles_exp += "<i>" + movies[m]['title'] + "</i>" + ", "
+                m_titles_exp = "<i>" + movies[items_profile[-2]]['title'] + "</i>" + " and " + "<i>" + movies[items_profile[-1]]['title'] + "</i>"
+            explanation += " you " + random.choice(['love', 'like', 'prefer']) + movies_exp + " whose " + random.choice(['category', 'genre']) + " is " + "<b>" + str(ppt) + "</b>" + " as " + m_titles_exp + "."
             count += 1
         return explanation
 

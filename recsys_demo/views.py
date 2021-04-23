@@ -183,7 +183,7 @@ def recommendation_view(request):
             recommended_items_hybride = hybride_recommender(_NB_REC, request.session['user_inputs_ratings'])
             print("Hybrid recommendations:" + str(recommended_items_hybride))
             request.session['recommended_items'] = recommended_items_hybride
-            for iid in recommended_items_hybride:
+            for iid in recommended_items_hybride[:3]:
                 if iid in movies.keys():
                     movie_info = movies[iid]
                     rec_dict[iid] = movie_info
