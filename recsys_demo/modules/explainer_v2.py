@@ -11,11 +11,6 @@ from scipy import stats
 
 class DBpediaCategoryTree:
     def __init__(self):
-        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/node_children_dict_valid_avec_id.pickle'), 'rb') as file:
-            self.node_children_dict_valid = pickle.load(file)
-
-        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/node_parent_dict_valid_avec_id.pickle'), 'rb') as file:
-            self.node_parent_dict_valid = pickle.load(file)
 
         with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/movie_annotation_dict.pickle'), 'rb') as file:
             self.movie_annotation_dict = pickle.load(file)
@@ -39,6 +34,12 @@ class GraphForExplod:
         with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/annotation_counts_dict_explod.pickle'), 'rb') as file:
             self.annotation_counts_dict = pickle.load(file)
 
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/node_children_dict_valid_avec_id_explod.pickle'), 'rb') as file:
+            self.node_children_dict_valid = pickle.load(file)
+
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/node_parent_dict_valid_avec_id_explod.pickle'), 'rb') as file:
+            self.node_parent_dict_valid = pickle.load(file)
+
 
 class GraphForProposed:
     def __init__(self):
@@ -57,6 +58,12 @@ class GraphForProposed:
         with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/nodes_parse_post_order_new.pickle'), 'rb') as file:
             self.nodes_parse_post_order = pickle.load(file)
 
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/node_children_dict_valid_avec_id.pickle'), 'rb') as file:
+            self.node_children_dict_valid = pickle.load(file)
+
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/node_parent_dict_valid_avec_id.pickle'), 'rb') as file:
+            self.node_parent_dict_valid = pickle.load(file)
+
 
 class ExpLodBroader:
     def __init__(self, loader, dbpedia_annotation, profile_items=None, recommended_items=None, nb_po=3, alpha=0.5, beta=0.5):
@@ -65,8 +72,8 @@ class ExpLodBroader:
         self.nb_po = nb_po
         self.alpha = alpha
         self.beta = beta
-        self.node_children_dict_valid = loader.node_children_dict_valid
-        self.node_parent_dict_valid = loader.node_parent_dict_valid
+        self.node_children_dict_valid = dbpedia_annotation.node_children_dict_valid
+        self.node_parent_dict_valid = dbpedia_annotation.node_parent_dict_valid
         self.movie_annotation_dict = loader.movie_annotation_dict
         self.entity_label_dict = loader.entity_label_dict
         self.annotation_counts_dict = dbpedia_annotation.annotation_counts_dict
@@ -99,7 +106,7 @@ class ExpLodBroader:
         for ppt in all_properties:
             nb_i_prof = len(ppt_item_profil_dict[ppt])
             nb_i_rec = len(ppt_item_rec_dict[ppt])
-            nb_item_described_by_ppt = self.annotation_counts_dict[ppt]
+            nb_item_described_by_ppt = len(self.annotation_counts_dict[ppt])
             idf_ppt = math.log(self.total_nb_items / nb_item_described_by_ppt)
             ppt_score_dict[ppt] = (self.alpha * nb_i_prof / profile_size + self.beta * nb_i_rec / recommendation_size) * idf_ppt
 
@@ -107,12 +114,29 @@ class ExpLodBroader:
         for broader_ppt in commun_ppts:
             associated_items = parents_profile_dict[broader_ppt].union(parents_rec_dict[broader_ppt])
             nb_item_described_by_ppt = self.annotation_counts_dict.get(broader_ppt)
-            idf_broader_ppt = 0 if nb_item_described_by_ppt is None else math.log(self.total_nb_items / nb_item_described_by_ppt)
             child_ppts = set(self.node_children_dict_valid[broader_ppt]).intersection(all_properties)
+            if nb_item_described_by_ppt is None:
+                # idf_broader_ppt = 0
+                nb_ = set()
+                for child in child_ppts:
+                    nb_ = nb_.union(self.annotation_counts_dict.get(child))
+                idf_broader_ppt = math.log(self.total_nb_items / len(nb_))
+            else:
+                idf_broader_ppt = math.log(self.total_nb_items / len(nb_item_described_by_ppt))
+
             score_broader_ppt = np.sum([ppt_score_dict[child] for child in child_ppts]) * idf_broader_ppt
             results.append((score_broader_ppt, broader_ppt, associated_items))
         results.sort(key=lambda x:x[0], reverse=True)
         return results[:self.nb_po]
+        # for broader_ppt in commun_ppts:
+        #     associated_items = parents_profile_dict[broader_ppt].union(parents_rec_dict[broader_ppt])
+        #     nb_item_described_by_ppt = self.annotation_counts_dict.get(broader_ppt)
+        #     idf_broader_ppt = 0 if nb_item_described_by_ppt is None else math.log(self.total_nb_items / nb_item_described_by_ppt)
+        #     child_ppts = set(self.node_children_dict_valid[broader_ppt]).intersection(all_properties)
+        #     score_broader_ppt = np.sum([ppt_score_dict[child] for child in child_ppts]) * idf_broader_ppt
+        #     results.append((score_broader_ppt, broader_ppt, associated_items))
+        # results.sort(key=lambda x:x[0], reverse=True)
+        # return results[:self.nb_po]
 
     def get_parents(self, ppt_item_dict):
         parents_dict = defaultdict(set)
@@ -152,8 +176,8 @@ class ExpProposed:
         self.profile_items = profile_items
         self.recommended_items = recommended_items
         self.nb_po = nb_po
-        self.node_children_dict_valid = loader.node_children_dict_valid
-        self.node_parent_dict_valid = loader.node_parent_dict_valid
+        self.node_children_dict_valid = dbpedia_annotation.node_children_dict_valid
+        self.node_parent_dict_valid = dbpedia_annotation.node_parent_dict_valid
         self.movie_annotation_dict = loader.movie_annotation_dict
         self.entity_label_dict = loader.entity_label_dict
         self.annotation_counts_dict = dbpedia_annotation.annotation_counts_dict
