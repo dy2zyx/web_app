@@ -1,0 +1,114 @@
+{% extends 'recsys_demo/_base.html' %}
+{% load static %}
+
+{% block css %}
+{{ block.super }}
+{% endblock css %}
+{% block title %}Recommendation details and re-rate{% endblock title %}
+{% block content %}
+
+<div style="width: 45%; margin:0 auto;">
+    <div class="alert alert-warning">
+        <h3 class="alert-heading">Etape 4/6 </h3>
+      <h4 class="alert-heading">Pour aller plus loin nous vous proposons de :</h4>
+        <ul>
+            <li>1. Consulter la bande annonce du film recommandé (à traver le lien qui vous amènera vers une page)</li>
+            <li>2. Après avoir regardé la bande annonce, <b>revenir</b> à l'application et <b>réévaluer</b> la recommandation (votre avis pourra évoluer après avoir vu la bande annonce).</li>
+        </ul>
+    </div>
+</div>
+<br>
+
+{% if recomm_dicts %}
+<div class="row">
+
+<div class="col">
+{% for iid, i_data in recomm_dicts.0.items %}
+    <div class="card mb-3 border-info" style="width: 90%; margin:0 auto;">
+      <div class="row no-gutters">
+        <div class="col-md-4">
+          <img src="{{ i_data.poster_path }}" class="card-img">
+        </div>
+        <div class="col-md-8">
+          <div class="card-body">
+            <h5 class="card-title text-dark">{{  i_data.title }}</h5>
+              <br>
+              <h6 class="card-subtitle mb-2 text-info">Lien vers la bande annonce du film</h6>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text text-warning" target="_blank"> Cliquer le lien et consulter la bande annonce</a>
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
+              {% for _, exp_data in exp_dicts_2.0.items %}
+              <p class="card-text">{{  exp_data.exp_style.1|safe  }} </p>
+              {% endfor %}
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">Réévaluer ce film</h6>
+              <form method="post" id="rating_form_Q1_2">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_2_{{iid}}" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endfor %}
+</div>
+</div>
+{% endif %}
+
+
+<div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
+        <button type="submit" id="feedback_exp_top1_2" onclick="myFunc()" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Valider l'évaluation </button>
+</div>
+
+<br>
+<div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
+    <form action="/movie_rec/recommendation/explanation_top1_rec_3">
+        <button type="submit" id="feedback_exp_top1_2_done" onclick="toggle('loading_exp2')" class="btn btn-success" style="display:none; max-width: 100%; margin: 0 auto;"><i class="fa fa-arrow-circle-right fa-lg"></i> Etape suivante </button>
+    </form>
+<!--    <div class="d-flex flex-column align-items-center justify-content-center" id="loading_exp2" style="visibility:hidden;">-->
+<!--       <div class="row">-->
+<!--           <div class="spinner-border text-info" role="status">-->
+<!--               <span class="sr-only">Loading...</span>-->
+<!--           </div>-->
+<!--        </div>-->
+<!--        <div class="row text-info">-->
+<!--          <strong>Le calcul de l'explication de la recommandation peut prendre un peu de temps, merci de patienter...</strong>-->
+<!--        </div>-->
+<!--    </div>-->
+</div>
+{% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script src="{% static 'recsys_demo/js/movie_re_eval.js' %}"></script>
+<script>
+function toggle(anId)
+{
+	node = document.getElementById(anId);
+	if (node.style.visibility=="hidden")
+	{
+		// Contenu caché, le montrer
+		node.style.visibility = "visible";
+		node.style.height = "auto";			// Optionnel rétablir la hauteur
+	}
+	else
+	{
+		// Contenu visible, le cacher
+		node.style.visibility = "hidden";
+		node.style.height = "0";			// Optionnel libérer l'espace
+	}
+}
+
+function myFunc(){
+  var x = document.getElementById("feedback_exp_top1_2_done");
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+</script>
+
+{% endblock javascript %}

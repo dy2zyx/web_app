@@ -23,11 +23,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'ywfi#2e*014gbbwarm53zx3os58s7_gd194nsz*up71k_%1w)8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 # DEBUG = True
-# ALLOWED_HOSTS = []  # while debug = True
+ALLOWED_HOSTS = []  # while debug = True
 
-ALLOWED_HOSTS = ['*']  # while debug = False
+# ALLOWED_HOSTS = ['*']  # while debug = False
 
 
 # Application definition

@@ -23,6 +23,9 @@ class DBpediaCategoryTree:
         with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/entity_label_dict.pickle'), 'rb') as file:
             self.entity_label_dict = pickle.load(file)
 
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/id_ppt_dict.pickle'), 'rb') as file:
+            self.id_ppt_dict = pickle.load(file)
+
         self.total_nb_items = len(self.movie_annotation_dict.keys())
 
 
@@ -54,6 +57,7 @@ class GraphForProposed:
         with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/nodes_parse_post_order_new.pickle'), 'rb') as file:
             self.nodes_parse_post_order = pickle.load(file)
 
+
 class ExpLodBroader:
     def __init__(self, loader, dbpedia_annotation, profile_items=None, recommended_items=None, nb_po=3, alpha=0.5, beta=0.5):
         self.profile_items = profile_items
@@ -67,6 +71,7 @@ class ExpLodBroader:
         self.entity_label_dict = loader.entity_label_dict
         self.annotation_counts_dict = dbpedia_annotation.annotation_counts_dict
         self.total_nb_items = loader.total_nb_items
+        self.id_ppt_dict = loader.id_ppt_dict
 
     def get_properties(self):
         ppt_item_profil_dict = defaultdict(set)
@@ -135,7 +140,8 @@ class ExpLodBroader:
         return label
 
     def entity_to_label(self, entity):
-        label = entity.replace('<http://dbpedia.org/resource/Category:', '')
+        label = self.id_ppt_dict[entity]
+        label = label.replace('<', '')
         label = label.replace('>', '')
         label = label.replace('_', ' ')
         return label
@@ -158,6 +164,7 @@ class ExpProposed:
         self.nodes_parse_post_order = dbpedia_annotation.nodes_parse_post_order
         self.ppt_item_profil_dict = self.get_properties_prof()
         self.visited = set()
+        self.id_ppt_dict = loader.id_ppt_dict
 
     def post_order(self, root):
         self.visited.clear()
@@ -355,7 +362,8 @@ class ExpProposed:
         return label
 
     def entity_to_label(self, entity):
-        label = entity.replace('<http://dbpedia.org/resource/Category:', '')
+        label = self.id_ppt_dict[entity]
+        label = label.replace('<', '')
         label = label.replace('>', '')
         label = label.replace('_', ' ')
         return label

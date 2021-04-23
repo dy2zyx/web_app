@@ -16,7 +16,6 @@ from django.views.decorators.cache import cache_page
 from django.conf import settings
 from .models import UserInfo
 
-
 user_inputs_ratings = dict()
 user_inputs = list()
 init()
@@ -37,7 +36,7 @@ for m_id in random_movie_ids:
 class UserLoginView(CreateView):
     template_name = 'recsys_demo/login.html'
     model = UserInfo
-    fields = ('first_name', 'last_name', 'sex', 'email', 'education')
+    fields = ('first_name', 'last_name', 'sex', 'email')
 
     def form_valid(self, form):
         # if self.request.method == 'POST':
@@ -64,9 +63,9 @@ class IndexView(generic.TemplateView):
 class ThanksView(generic.TemplateView):
     template_name = 'recsys_demo/thanks.html'
 
+
 @csrf_exempt
 def movierec_view(request):
-    # print(request.session['user_inputs_ratings'])
 
     template_name = 'recsys_demo/movie_rec.html'
     # movies = parse_movie_metadata()
@@ -89,6 +88,8 @@ def movierec_view(request):
         if form.is_valid():
             user_input = form.cleaned_data['movie_title']
             if not user_input in movie_titles:
+                warning_msg = "Le film <" + str(user_input) + "> n'est pas dans la base de films, veuillez en rechercher un autre."
+                messages.warning(request, warning_msg)
                 return HttpResponseRedirect('movie_rec')
             movie_id = [iid for iid in movies.keys() if ('title', user_input) in movies[iid].items()][0]
             movie_info = movies[movie_id]
@@ -103,6 +104,7 @@ def movierec_view(request):
     return render(request, template_name=template_name, context={'nb_movies_in_base': "{:,}".format(len(movies.keys())), 'movie_titles': movie_titles, 'random_movies_dict': random_movies_dict, 'random_movie_id_dict': random_movie_id_dict})
 
 
+@csrf_exempt
 def profil_view(request):
     template_name = 'recsys_demo/profil.html'
 
@@ -146,7 +148,7 @@ def recommendation_view(request):
     else:
         recommenders = ['hybride']
         recommender = 'hybride'
-        print(recommender)
+        # print(recommender)
         # save the algo_config for user
         current_user_id = request.session['current_user_metadata']['user_id']
         user_info = UserInfo.objects.get(id=current_user_id)
@@ -186,6 +188,11 @@ def recommendation_view(request):
                     movie_info = movies[iid]
                     rec_dict[iid] = movie_info
             rec_dicts.append(rec_dict)
+
+        user_info.profile_items = str(request.session['user_inputs_ratings'])
+        user_info.save()
+        user_info.recommended_items = str(request.session['recommended_items'])
+        user_info.save()
         return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
 
 
@@ -209,7 +216,7 @@ def top_1_explanation_view(request):
     rec_dicts = list()
     # for recommendation_approach in recommendation_approaches:
     input_dict = request.session['user_inputs_ratings']
-    recommended_items = request.session['recommended_items'][:1]
+    recommended_items = [request.session['recommended_items'][0]]
 
     # random choice of explanation style and save to user configs
     explanation_styles = ['explod', 'pem']
@@ -222,13 +229,12 @@ def top_1_explanation_view(request):
     user_info.exp_style_config = str(explanation_style)
     user_info.save()
 
-    exp_output_dict = exp_generator(input_dict, recommended_items, exp_style=explanation_style)
-
-    # save the algo_config for user
-    # current_user_id = request.session['current_user_metadata']['user_id']
-    # user_info = UserInfo.objects.get(id=current_user_id)
-    user_info.num_exp_top_1 = str(len(exp_output_dict.keys()))
+    # Save slience for explod-5
+    exp_output_dict_save = exp_generator(input_dict, request.session['recommended_items'], exp_style='explod')
+    user_info.num_exp_top_5_list = str(len(exp_output_dict_save.keys()))
     user_info.save()
+    # Fin save
+    exp_output_dict = exp_generator(input_dict, recommended_items, exp_style=explanation_style)
 
     rec_dict = dict(dict())
     for iid in recommended_items:
@@ -244,6 +250,8 @@ def top_1_explanation_view(request):
 
             rec_dict[iid] = exp_dict
     rec_dicts.append(rec_dict)
+
+    request.session['exp_dicts_1'] = rec_dicts
     return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
 
 
@@ -256,6 +264,153 @@ def re_eval_view(request):
         # print(user_info)
         feedback_dict = request.POST.get('feedback_top1_2')
         user_info.feed_back_re_top_1 = str(feedback_dict)
+        # print("feed_back_re_top_1: " + feedback_dict)
+        user_info.save()
+        message = 'update successful'
+        response = HttpResponse(message, content_type="text/html")
+        return response
+
+    rec_dicts = list()
+    rec_dict = dict()
+    recommended_items = [request.session['recommended_items'][0]]
+    for iid in recommended_items:
+        if iid in movies.keys():
+            movie_info = movies[iid]
+            rec_dict[iid] = movie_info
+    rec_dicts.append(rec_dict)
+    exp_dicts_1 = request.session['exp_dicts_1']
+    return render(request, template_name=template_name, context={'recomm_dicts': rec_dicts, 'exp_dicts_1': exp_dicts_1})
+
+
+# @cache_page(60 * 15)
+def top_1_explanation_view2(request):
+    template_name = 'recsys_demo/exp_for_top_1_recommendation_2.html'
+
+    current_user_id = request.session['current_user_metadata']['user_id']
+    # save the feedback of the current user to the database
+    if request.is_ajax():
+        user_info = UserInfo.objects.get(id=current_user_id)
+        # print(user_info)
+        feedback_dict = request.POST.get('feedback_top1')
+        # print("feedback_dict_1: " + feedback_dict)
+        user_info.feed_back_top_1_2 = str(feedback_dict)
+        user_info.save()
+        message = 'update successful'
+        response = HttpResponse(message, content_type="text/html")
+        return response
+
+    rec_dicts = list()
+    # for recommendation_approach in recommendation_approaches:
+    input_dict = request.session['user_inputs_ratings']
+    recommended_items = [request.session['recommended_items'][1]]
+
+    explanation_style = request.session['explanation_style']
+    print(explanation_style)
+
+    exp_output_dict = exp_generator(input_dict, recommended_items, exp_style=explanation_style)
+
+    rec_dict = dict(dict())
+    for iid in recommended_items:
+        exp_dict = dict()
+        if iid in movies.keys():
+            movie_info = movies[iid]
+            if iid in exp_output_dict.keys():
+                explanation = exp_output_dict[iid]
+                exp_dict['exp_style'] = (movie_info, explanation)
+            else:
+                explanation = "Hops, it seems that it is failed to generate explanation for this item."
+                exp_dict['exp_style'] = (movie_info, explanation)
+
+            rec_dict[iid] = exp_dict
+    rec_dicts.append(rec_dict)
+    request.session['exp_dicts_2'] = rec_dicts
+    return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
+
+
+# @cache_page(60 * 15)
+def re_eval_view2(request):
+    template_name = 'recsys_demo/re_eval_2.html'
+    current_user_id = request.session['current_user_metadata']['user_id']
+    if request.is_ajax():
+        user_info = UserInfo.objects.get(id=current_user_id)
+        # print(user_info)
+        feedback_dict = request.POST.get('feedback_top1_2')
+        user_info.feed_back_re_top_1_2 = str(feedback_dict)
+        # print("feed_back_re_top_1: " + feedback_dict)
+        user_info.save()
+        message = 'update successful'
+        response = HttpResponse(message, content_type="text/html")
+        return response
+
+    rec_dicts = list()
+
+    # recommendation_approaches = ['recommended_items_cbf', 'recommended_items_svd', 'recommended_items_hybride']
+    # for recommendation_approach in recommendation_approaches:
+    rec_dict = dict()
+    recommended_items = [request.session['recommended_items'][1]]
+    for iid in recommended_items:
+        if iid in movies.keys():
+            movie_info = movies[iid]
+            rec_dict[iid] = movie_info
+    rec_dicts.append(rec_dict)
+    exp_dicts_2 = request.session['exp_dicts_2']
+    return render(request, template_name=template_name, context={'recomm_dicts': rec_dicts, 'exp_dicts_2': exp_dicts_2})
+
+
+# @cache_page(60 * 15)
+def top_1_explanation_view3(request):
+    template_name = 'recsys_demo/exp_for_top_1_recommendation_3.html'
+
+    current_user_id = request.session['current_user_metadata']['user_id']
+    # save the feedback of the current user to the database
+    if request.is_ajax():
+        user_info = UserInfo.objects.get(id=current_user_id)
+        # print(user_info)
+        feedback_dict = request.POST.get('feedback_top1')
+        # print("feedback_dict_1: " + feedback_dict)
+        user_info.feed_back_top_1_3 = str(feedback_dict)
+        user_info.save()
+        message = 'update successful'
+        response = HttpResponse(message, content_type="text/html")
+        return response
+
+    rec_dicts = list()
+    # for recommendation_approach in recommendation_approaches:
+    input_dict = request.session['user_inputs_ratings']
+    recommended_items = [request.session['recommended_items'][2]]
+
+    explanation_style = request.session['explanation_style']
+    print(explanation_style)
+
+    exp_output_dict = exp_generator(input_dict, recommended_items, exp_style=explanation_style)
+
+    rec_dict = dict(dict())
+    for iid in recommended_items:
+        exp_dict = dict()
+        if iid in movies.keys():
+            movie_info = movies[iid]
+            if iid in exp_output_dict.keys():
+                explanation = exp_output_dict[iid]
+                exp_dict['exp_style'] = (movie_info, explanation)
+            else:
+                explanation = "Hops, it seems that it is failed to generate explanation for this item."
+                exp_dict['exp_style'] = (movie_info, explanation)
+
+            rec_dict[iid] = exp_dict
+    rec_dicts.append(rec_dict)
+    request.session['exp_dicts_3'] = rec_dicts
+    return render(request, template_name=template_name, context={'rec_dicts': rec_dicts})
+
+
+# @cache_page(60 * 15)
+def re_eval_view3(request):
+    template_name = 'recsys_demo/re_eval_3.html'
+    current_user_id = request.session['current_user_metadata']['user_id']
+    if request.is_ajax():
+        user_info = UserInfo.objects.get(id=current_user_id)
+        # print(user_info)
+        feedback_dict = request.POST.get('feedback_top1_2')
+        user_info.feed_back_re_top_1_3 = str(feedback_dict)
         print("feed_back_re_top_1: " + feedback_dict)
         user_info.save()
         message = 'update successful'
@@ -267,14 +422,14 @@ def re_eval_view(request):
     # recommendation_approaches = ['recommended_items_cbf', 'recommended_items_svd', 'recommended_items_hybride']
     # for recommendation_approach in recommendation_approaches:
     rec_dict = dict()
-    recommended_items = request.session['recommended_items'][:1]
+    recommended_items = [request.session['recommended_items'][2]]
     for iid in recommended_items:
         if iid in movies.keys():
             movie_info = movies[iid]
             rec_dict[iid] = movie_info
     rec_dicts.append(rec_dict)
-
-    return render(request, template_name=template_name, context={'recomm_dicts': rec_dicts})
+    exp_dicts_3 = request.session['exp_dicts_3']
+    return render(request, template_name=template_name, context={'recomm_dicts': rec_dicts, 'exp_dicts_3': exp_dicts_3})
 
 
 # @cache_page(60 * 15)

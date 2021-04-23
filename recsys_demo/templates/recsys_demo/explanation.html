@@ -58,14 +58,14 @@
               <p class="card-text">{{  i_data.exp_style.0.release_date  }} </p>
               <h6 class="card-subtitle mb-2 text-info">Explanation for the movie</h6>
               <p class="card-text">{{  i_data.exp_style.1|safe  }} </p>
-<!--              <hr/>-->
-<!--              <h6 class="card-subtitle mb-2 text-info">How much you like this explanation?</h6>-->
-<!--              <form method="post" id="rating_form_Q1">-->
-<!--                  {% csrf_token %}-->
-<!--                  <div class="pt-3">-->
-<!--                      <input id="Q1_{{iid}}_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">-->
-<!--                  </div>-->
-<!--              </form>-->
+              <hr/>
+              <h6 class="card-subtitle mb-2 text-info">How much you like this explanation?</h6>
+              <form method="post" id="rating_form_Q1">
+                  {% csrf_token %}
+                  <div class="pt-3">
+                      <input id="Q1_{{iid}}_for_list" name="movie_rating" class="rating rating-loading" data-min="0" data-max="5" data-step="1" value="0" data-size="md">
+                  </div>
+              </form>
           </div>
         </div>
       </div>

@@ -18,7 +18,7 @@
             <li style="list-style-type:none"><b>OU</b></li>
             <li><p class="mb-0">Le cas échéant, choisir les films parmi ceux de la liste proposée ci-dessous.</p></li>
         </ul>
-        <p class="mb-0">PS : si le titre recherché (avec la barre de recherche) n'apparaît pas dans la liste proposée, veuillez en rechercher un autre.</p>
+        <p class="mb-0">PS : Si le titre recherché (avec la barre de recherche) n'apparaît pas dans la liste proposée, veuillez en rechercher un autre.</p>
     </div>
 </div>
 
@@ -33,14 +33,15 @@
                     </button>
                 </span>
         </div>
-        </span>
     </form>
 
-<!--    {% if warning%}-->
-<!--    <div class="alert alert-warning" role="alert" style="width: 45%; margin:0 auto;">-->
-<!--        {{warning}}-->
-<!--    </div>-->
-<!--    {% endif %}-->
+    {% if messages %}
+        <ul class="messages list-group-flush" style="width: 65%; margin:0 auto;">
+            {% for message in messages %}
+            <li class="list-group-item list-group-item-warning" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
     {% if movie_info %}
     <div style="width: 65%; margin:0 auto;">
