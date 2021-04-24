@@ -87,7 +87,7 @@ def movierec_view(request):
             # user_inputs_ratings[input_iid] = input_rating
             request.session['user_inputs_ratings'][input_iid] = input_rating
             request.session.modified = True
-            print(request.session['user_inputs_ratings'])
+            # print(request.session['user_inputs_ratings'])
             response = HttpResponse(input_rating, content_type="text/html")
             return response
 
@@ -108,7 +108,7 @@ def movierec_view(request):
                        'movie_id': movie_id, 'random_movies_dict': request.session['random_movies_dict'], 'random_movie_id_dict': request.session['random_movie_id_dict']}
             return render(request, template_name, context=context)
         else:
-            print(form.errors.as_data())
+            # print(form.errors.as_data())
             return HttpResponseRedirect('movie_rec')
     return render(request, template_name=template_name, context={'nb_movies_in_base': "{:,}".format(len(movies.keys())), 'movie_titles': movie_titles, 'random_movies_dict': request.session['random_movies_dict'], 'random_movie_id_dict': request.session['random_movie_id_dict']})
 
@@ -119,7 +119,7 @@ def profil_view(request):
 
     if request.is_ajax():
         removed_movie_id = request.POST.get('removed_movie_id')
-        print(removed_movie_id)
+        # print(removed_movie_id)
         # del request.session['user_inputs_ratings'][str(removed_movie_id)]
         # del user_inputs_ratings[str(removed_movie_id)]
         request.session['user_inputs_ratings'].pop(str(removed_movie_id), None)
@@ -127,12 +127,12 @@ def profil_view(request):
         request.session.modified = True
 
     if not 'user_inputs_ratings' in request.session.keys():
-        print("here")
+        # print("here")
         return render(request, template_name=template_name, context={'nb_item': 0})
     else:
         data_dict = dict()
         # request.session.modified = True
-        print(request.session['user_inputs_ratings'])
+        # print(request.session['user_inputs_ratings'])
         for iid in request.session['user_inputs_ratings'].keys():
             if iid in movies.keys():
                 movie_info = movies[iid]
@@ -142,7 +142,7 @@ def profil_view(request):
                 l.append(movie_info)
                 l.append(movie_rating)
                 data_dict[iid] = l
-        print(request.session['user_inputs_ratings'])
+        # print(request.session['user_inputs_ratings'])
         return render(request, template_name=template_name, context={'data_dict': data_dict, 'nb_item': len(data_dict.keys())})
 
 
@@ -170,10 +170,10 @@ def recommendation_view(request):
         rec_dict = dict()
         if recommender == 'cbf':
             recommended_items_cbf = cbf_recommender(_NB_REC, request.session['user_inputs_ratings'])
-            print("Content-based recommendations:" + str(recommended_items_cbf))
+            # print("Content-based recommendations:" + str(recommended_items_cbf))
             # request.session['recommended_items_cbf'] = recommended_items_cbf
             request.session['recommended_items'] = recommended_items_cbf
-            for iid in recommended_items_cbf:
+            for iid in recommended_items_cbf[:3]:
                 if iid in movies.keys():
                     movie_info = movies[iid]
                     rec_dict[iid] = movie_info
@@ -181,7 +181,7 @@ def recommendation_view(request):
 
         if recommender == 'svd':
             recommended_items_svd = svd_recommender(_NB_REC, request.session['user_inputs_ratings'])
-            print("CF-based recommendations:" + str(recommended_items_svd))
+            # print("CF-based recommendations:" + str(recommended_items_svd))
             request.session['recommended_items'] = recommended_items_svd
             for iid in recommended_items_svd:
                 if iid in movies.keys():
@@ -191,7 +191,7 @@ def recommendation_view(request):
 
         if recommender == 'hybride':
             recommended_items_hybride = hybride_recommender(_NB_REC, request.session['user_inputs_ratings'])
-            print("Hybrid recommendations:" + str(recommended_items_hybride))
+            # print("Hybrid recommendations:" + str(recommended_items_hybride))
             request.session['recommended_items'] = recommended_items_hybride
             for iid in recommended_items_hybride[:3]:
                 if iid in movies.keys():
@@ -231,7 +231,7 @@ def top_1_explanation_view(request):
     # random choice of explanation style and save to user configs
     explanation_styles = ['explod', 'pem']
     explanation_style = random.choice(explanation_styles)
-    print(explanation_style)
+    # print(explanation_style)
     request.session['explanation_style'] = explanation_style
     # save the algo_config for user
     current_user_id = request.session['current_user_metadata']['user_id']
@@ -315,7 +315,7 @@ def top_1_explanation_view2(request):
     recommended_items = [request.session['recommended_items'][1]]
 
     explanation_style = request.session['explanation_style']
-    print(explanation_style)
+    # print(explanation_style)
 
     exp_output_dict = exp_generator(input_dict, recommended_items, exp_style=explanation_style)
 
@@ -390,7 +390,7 @@ def top_1_explanation_view3(request):
     recommended_items = [request.session['recommended_items'][2]]
 
     explanation_style = request.session['explanation_style']
-    print(explanation_style)
+    # print(explanation_style)
 
     exp_output_dict = exp_generator(input_dict, recommended_items, exp_style=explanation_style)
 
@@ -421,7 +421,7 @@ def re_eval_view3(request):
         # print(user_info)
         feedback_dict = request.POST.get('feedback_top1_2')
         user_info.feed_back_re_top_1_3 = str(feedback_dict)
-        print("feed_back_re_top_1: " + feedback_dict)
+        # print("feed_back_re_top_1: " + feedback_dict)
         user_info.save()
         message = 'update successful'
         response = HttpResponse(message, content_type="text/html")
@@ -452,7 +452,7 @@ def explanation_view(request):
         user_info = UserInfo.objects.get(id=current_user_id)
         # print(user_info)
         feedback_dict = request.POST.get('feedback')
-        print("feedback_dict_1: " + feedback_dict)
+        # print("feedback_dict_1: " + feedback_dict)
         user_info.feed_back_list = str(feedback_dict)
         user_info.save()
         message = 'update successful'
