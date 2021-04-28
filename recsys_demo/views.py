@@ -8,7 +8,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from .methods import parse_movie_metadata, movies, init, cbf_recommender, svd_recommender, hybride_recommender, exp_generator
-from .forms import MovieTitleForm
+from .forms import MovieTitleForm, UserCommentsForm
 from collections import defaultdict
 from django.views.generic import CreateView
 from django.contrib import messages
@@ -58,9 +58,31 @@ class IndexView(generic.TemplateView):
     template_name = 'recsys_demo/index.html'
 
 
-class ThanksView(generic.TemplateView):
+@csrf_exempt
+def thanks_view(request):
     template_name = 'recsys_demo/thanks.html'
 
+    if request.method == 'POST':
+        form = UserCommentsForm(request.POST)
+        if form.is_valid():
+            user_comments = form.cleaned_data['user_comments']
+            # print(user_comments)
+            current_user_id = request.session['current_user_metadata']['user_id']
+            user_info = UserInfo.objects.get(id=current_user_id)
+            user_info.user_comments = str(user_comments)
+            user_info.save()
+            return HttpResponseRedirect('thanks')
+    return render(request, template_name)
+
+# class ThanksView(generic.TemplateView):
+#     template_name = 'recsys_demo/thanks.html'
+#
+#     def get_context_data(self, *args, **kwargs):
+#         if self.request.method == 'POST':
+#             form = UserCommentsForm(self.request.POST)
+#             if form.is_valid():
+#                 user_comments = form.cleaned_data['user_comments']
+#                 print(user_comments)
 
 @csrf_exempt
 def movierec_view(request):

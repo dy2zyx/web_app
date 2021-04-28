@@ -16,12 +16,24 @@
 <!--    </div>-->
 </header>
 
-<!--<div class="form-group">-->
-<!--    <label for="user_commentaires">Laisser votre commentaire</label>-->
-<!--    <textarea class="form-control" id="user_commentaires" rows="3"></textarea>-->
-<!--        <br>-->
-<!--         <button id="submit_rating" type="submit" class="btn btn-success" onClick='showMessage()'>-->
-<!--            <i class="fa fa-check fa-lg"></i> Submit-->
-<!--        </button>-->
-<!--</div>-->
+<form action="/thanks"  method="post">
+    {%  csrf_token  %}
+    <div class="form-group">
+        <label for="user_commentaires">Si vous le souhaitez, vous pouvez laisser votre commentaire</label>
+        <textarea name="user_comments" class="form-control" id="user_commentaires" rows="3"></textarea>
+            <br>
+             <button id="submit_rating" type="submit" class="btn btn-success" onClick='showMessage2()'>
+                <i class="fa fa-check fa-lg"></i> Submit
+            </button>
+    </div>
+</form>
 {% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+function showMessage2(){
+	 alert("Merci pour votre commentaire !");
+}
+</script>
+{% endblock javascript %}

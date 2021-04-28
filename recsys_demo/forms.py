@@ -8,6 +8,8 @@ class MovieTitleForm(forms.Form):
     movie_title = forms.CharField(max_length=100)
 
 
+class UserCommentsForm(forms.Form):
+    user_comments = forms.CharField(max_length=10000)
 # class UserInfoForm(forms.ModelForm):
 #     class Meta:
 #         model = UserInfo

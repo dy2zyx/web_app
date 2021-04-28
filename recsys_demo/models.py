@@ -58,5 +58,7 @@ class UserInfo(models.Model):
     # num_exp_top_1 = models.CharField(max_length=50, default="Nothing yet")
     num_exp_top_5_list = models.CharField(max_length=50, default="Nothing yet")
 
+    user_comments = models.CharField(max_length=10000, default="Nothing yet")
+
     def get_absolute_url(self):
         return reverse('index')
