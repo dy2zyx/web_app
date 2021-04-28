@@ -43,6 +43,9 @@ class GraphForExplod:
 
 class GraphForProposed:
     def __init__(self):
+        with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/annotation_counts_dict_explod.pickle'), 'rb') as file:
+            self.annotation_counts_dict_explod = pickle.load(file)
+
         with open(os.path.join(settings.BASE_DIR, 'recsys_demo/static/recsys_demo/data/annotation_counts_dict.pickle'), 'rb') as file:
             self.annotation_counts_dict = pickle.load(file)
 
@@ -180,6 +183,7 @@ class ExpProposed:
         self.node_parent_dict_valid = dbpedia_annotation.node_parent_dict_valid
         self.movie_annotation_dict = loader.movie_annotation_dict
         self.entity_label_dict = loader.entity_label_dict
+        self.annotation_counts_dict_explod = dbpedia_annotation.annotation_counts_dict_explod
         self.annotation_counts_dict = dbpedia_annotation.annotation_counts_dict
         self.total_nb_items = loader.total_nb_items
         self.all_direct_annotations = dbpedia_annotation.all_direct_annotations
@@ -336,35 +340,14 @@ class ExpProposed:
         for candidate in candidates:
             ratio_db = self.annotation_counts_dict[candidate[0]] / self.total_nb_items
             ratio_profil = candidate[1] / len(self.profile_items.keys())
-            score = ratio_profil / (ratio_db ** 2)
+            fold_change = ratio_profil / ratio_db
+            score = fold_change * math.log10(len(self.annotation_counts_dict_explod[candidate[0]]))
             if candidate[1] == 1:
-                score = min(score, 1)
-            if score >= 1:
+                score = min(score, 0)
+            if fold_change > 1:
                 result.append((candidate[0], score, self.annotation_counts_dict[candidate[0]], candidate[1], candidate[2], self.get_entity_label(candidate[0])))
 
         result.sort(key=lambda x:x[1], reverse=True)
-        return result[:self.nb_po]
-
-    def scoring_ficher(self, candidates):
-        result = list()
-        for candidate in candidates:
-            ratio_db = self.annotation_counts_dict[candidate[0]] / self.total_nb_items
-            ratio_profil = candidate[1] / len(self.profile_items.keys())
-            score = ratio_profil / ratio_db
-
-            f_obs = [candidate[1], len(self.profile_items.keys()) - candidate[1]]
-            f_exp = [self.annotation_counts_dict[candidate[0]], self.total_nb_items - self.annotation_counts_dict[candidate[0]]]
-            if f_exp[1] < 0:
-                p_score = 1
-            else:
-                p_score = 1 - stats.fisher_exact([f_obs, f_exp])[1]
-
-            if candidate[1] == 1:
-                score = min(score, 1)
-            if score >= 1:
-                result.append((candidate[0], score, p_score, self.annotation_counts_dict[candidate[0]], candidate[1], candidate[2], self.get_entity_label(candidate[0])))
-
-        result.sort(key=lambda x:x[2], reverse=True)
         return result[:self.nb_po]
 
     def scoring(self, candidates):

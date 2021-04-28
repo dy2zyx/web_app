@@ -16,6 +16,7 @@ $(document).ready(function () {
              //this gets called when server returns an OK response
 //             alert("it worked!");
 //            alert(data)
+            console.log(data)
             },
         error: function (data) {
 //             alert("it didnt work");

@@ -2,7 +2,7 @@ import pickle
 import os
 import random
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views import generic
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -19,6 +19,7 @@ from .models import UserInfo
 init()
 parse_movie_metadata()
 movie_titles = [movies[m_id]['title'] for m_id in movies.keys()]
+movie_french_titles = [movies[m_id]['en_fr_title'] for m_id in movies.keys()]
 _NB_REC = 5
 
 
@@ -43,23 +44,13 @@ class UserLoginView(CreateView):
         self.request.session['random_movies_dict'] = dict()
         self.request.session['random_movie_id_dict'] = dict()
 
-        # user_inputs = list()
-        # user_inputs_ratings = dict()
-        # random_movie_ids = random.sample(movies.keys(), k=10)
-        # random_movies_dict = dict()
-        # random_movie_id_dict = dict()
         compteur = 0
         for m_id in self.request.session['random_movie_ids']:
             self.request.session['random_movies_dict'][m_id] = (movies[m_id], compteur)
             self.request.session['random_movie_id_dict'][compteur] = m_id
             compteur += 1
-        # for m_id in random_movie_ids:
-        #     random_movies_dict[m_id] = (movies[m_id], compteur)
-        #     random_movie_id_dict[compteur] = m_id
-        #     compteur += 1
-        # print(self.request.session.keys())
+
         return HttpResponseRedirect('index')
-        # return render(self.request, 'recsys_demo/index.html', context=context)
 
 
 class IndexView(generic.TemplateView):
@@ -88,29 +79,40 @@ def movierec_view(request):
             request.session['user_inputs_ratings'][input_iid] = input_rating
             request.session.modified = True
             # print(request.session['user_inputs_ratings'])
-            response = HttpResponse(input_rating, content_type="text/html")
+            movies_info = movies[input_iid]
+            response = JsonResponse(movies_info, content_type="text/html")
             return response
+            # movies_infos = [movies[movie_id] for movie_id in request.session['user_inputs_ratings'].keys()]
+            # context = {"movie_infos": movies_infos, 'movie_titles': movie_titles}
+            # return render(request, template_name, context=context)
 
     if request.method == 'POST':
         form = MovieTitleForm(request.POST)
         if form.is_valid():
+            # user_input = form.cleaned_data['movie_title']
             user_input = form.cleaned_data['movie_title']
-            if not user_input in movie_titles:
+            if not user_input in movie_french_titles:
                 warning_msg = "Le film <" + str(user_input) + "> n'est pas dans la base de films, veuillez en rechercher un autre."
                 messages.warning(request, warning_msg)
                 return HttpResponseRedirect('movie_rec')
-            movie_id = [iid for iid in movies.keys() if ('title', user_input) in movies[iid].items()][0]
+            # print(user_input)
+            movie_id = [iid for iid in movies.keys() if ('en_fr_title', user_input) in movies[iid].items()][0]
             movie_info = movies[movie_id]
             request.session['user_inputs'].append(movie_id)
             request.session.modified = True
             # request.session['user_inputs'] = user_inputs
-            context = {'user_input': user_input, 'movie_titles': movie_titles, 'movie_info': movie_info,
-                       'movie_id': movie_id, 'random_movies_dict': request.session['random_movies_dict'], 'random_movie_id_dict': request.session['random_movie_id_dict']}
+            movies_infos = [movies[movie_id] for movie_id in request.session['user_inputs_ratings'].keys()]
+            context = {'user_input': user_input, 'movie_french_titles': movie_french_titles, 'movie_info': movie_info,
+                       'movie_id': movie_id, 'random_movies_dict': request.session['random_movies_dict'], 'random_movie_id_dict': request.session['random_movie_id_dict'], "movie_infos": movies_infos}
             return render(request, template_name, context=context)
         else:
             # print(form.errors.as_data())
             return HttpResponseRedirect('movie_rec')
-    return render(request, template_name=template_name, context={'nb_movies_in_base': "{:,}".format(len(movies.keys())), 'movie_titles': movie_titles, 'random_movies_dict': request.session['random_movies_dict'], 'random_movie_id_dict': request.session['random_movie_id_dict']})
+
+    movies_infos = [movies[movie_id] for movie_id in request.session['user_inputs_ratings'].keys()]
+    context = {"movie_infos": movies_infos, 'movie_french_titles': movie_french_titles}
+    return render(request, template_name, context=context)
+    # return render(request, template_name=template_name, context={'nb_movies_in_base': "{:,}".format(len(movies.keys())), 'movie_titles': movie_titles, 'random_movies_dict': request.session['random_movies_dict'], 'random_movie_id_dict': request.session['random_movie_id_dict']})
 
 
 @csrf_exempt
@@ -156,8 +158,8 @@ def recommendation_view(request):
         messages.warning(request, warning_msg)
         return HttpResponseRedirect('profil')
     else:
-        recommenders = ['hybride']
-        recommender = 'hybride'
+        # recommenders = ['hybride']
+        recommender = 'cbf'
         # print(recommender)
         # save the algo_config for user
         current_user_id = request.session['current_user_metadata']['user_id']

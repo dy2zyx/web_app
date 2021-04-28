@@ -46,15 +46,19 @@ def parse_movie_metadata():
 
         while line != None and line != '':
             movie = dict()
-            id, title, release_date, poster_path, overview = line.split("::::")[0], \
+            id, title, release_date, poster_path, overview, french_title, en_fr_title = line.split("::::")[0], \
                                                              line.split("::::")[1], \
                                                              line.split("::::")[2], \
                                                              line.split("::::")[3], \
-                                                             line.split("::::")[4]
+                                                             line.split("::::")[4], \
+                                                             line.split("::::")[5], \
+                                                             line.split("::::")[6]
             movie['title'] = title
             movie['release_date'] = release_date
             movie['poster_path'] = poster_path
             movie['overview'] = overview
+            movie['french_title'] = french_title
+            movie['en_fr_title'] = en_fr_title.strip("\n")
             movie['dbpedia_uri'] = iid_uri_dict[id]
             movies[id] = movie
 
