@@ -29,3 +29,5 @@ To check if it Docker is successfully installed, open a terminal and run:
 5. Open a web navigator and go to ```localhost:8000/login``` If everything goes well, you will get into a login form.
 
 6. To shut down the application, in the terminal, run: ```make compose-stop```
+
+Version : 1.1
