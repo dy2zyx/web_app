@@ -30,4 +30,4 @@ To check if it Docker is successfully installed, open a terminal and run:
 
 6. To shut down the application, in the terminal, run: ```make compose-stop```
 
-Version : 1.1
+Version : 1.2
