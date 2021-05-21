@@ -40,8 +40,10 @@
           <div class="card-body">
             <h5 class="card-title text-dark">{{  i_data.title }}</h5>
               <br>
+
               <h6 class="card-subtitle mb-2 text-info">Lien vers la bande annonce du film</h6>
-              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text text-warning" target="_blank"> Cliquer le lien et consulter la bande annonce</a>
+              <a href="https://www.imdb.com/title/tt{{iid}}" class="card-text text-warning" target="_blank" ><img src="{% static 'recsys_demo/img/bd_annonce.jpg' %}" style="width:50%; float:none;" alt="Cliquer le lien et consulter la bande annonce"/> </a>
+                <br>
               <hr/>
               <h6 class="card-subtitle mb-2 text-info">Explanation for item</h6>
               {% for _, exp_data in exp_dicts_1.0.items %}
@@ -291,7 +293,7 @@
 
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
 <!--    <form action="/movie_rec/recommendation/re_eval">-->
-        <button type="submit" id="feedback_exp_top1_2" onclick="myFunc()" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Valider l'évaluation </button>
+        <button type="submit" id="feedback_exp_top1_2" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Valider l'évaluation </button>
 <!--    </form>-->
 </div>
 
@@ -334,14 +336,7 @@ function toggle(anId)
 	}
 }
 
-function myFunc(){
-  var x = document.getElementById("feedback_exp_top1_2_done");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
+
 </script>
 
 {% endblock javascript %}

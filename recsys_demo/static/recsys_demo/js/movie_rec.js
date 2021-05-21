@@ -3,7 +3,6 @@ $(document).ready(function () {
 //        $("#user_rating").rating('create');
 //    var input_rating = $("#user_rating").rating('create').val()
     var input_rating = 5;
-//    console.log(movie_id)
     var data_dict = {};
     data_dict.movie_id = movie_id;
     data_dict.movie_rating = input_rating;

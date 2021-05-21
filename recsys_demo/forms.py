@@ -5,7 +5,7 @@ from .models import UserInfo
 
 
 class MovieTitleForm(forms.Form):
-    movie_title = forms.CharField(max_length=100)
+    movie_title = forms.CharField(max_length=300)
 
 
 class UserCommentsForm(forms.Form):

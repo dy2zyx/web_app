@@ -30,10 +30,11 @@ class UserInfo(models.Model):
     #
     # education = models.CharField(choices=education_levels, default=None, max_length=20)
 
-    male, female = 'male', 'female'
+    male, female, autres = 'male', 'female', 'autres'
     sex = [
         (male, 'Male'),
         (female, 'Female'),
+        (autres, 'Other'),
     ]
 
     sex = models.CharField(choices=sex, default=None, max_length=20, null=True)

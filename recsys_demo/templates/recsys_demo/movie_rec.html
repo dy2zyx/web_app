@@ -12,11 +12,11 @@
 <div style="width: 65%; margin:0 auto;">
     <div class="alert alert-success">
       <h4 class="alert-heading">Création du profil</h4>
-      <h6 class="mb-0">- Sélectionner au minimum 5 films que vous avez particulièrement aimés. Vous allez trouver les films correspondants par leur titre en utilisant la barre de recherche avec l'auto-complétion.</h6>
+      <h6 class="mb-0">- Sélectionner au minimum 5 films que vous avez particulièrement aimés (vous pouvez en sélectionner davantage pour une recommandation plus précise). Vous allez trouver les films correspondants par leur titre en utilisant la barre de recherche avec l'auto-complétion. Apres avoir choisi / sélectionné un titre, cliquer sur l'icône de la "Loupe" pour afficher le film.</h6>
         <br>
         <p class="mb-0"><i>Notices : </i></p>
         <ul>
-            <li><p class="mb-0"><i>Afin d'ajouter dans votre profil le film trouvé, cliquer sur le bouton "Ajouter au profil" associé, un pop-up message sera affiché. </i></p>
+            <li><p class="mb-0"><i>Afin d'ajouter dans votre profil le film trouvé (celui affiché), cliquer sur le bouton "Ajouter au profil" associé, un pop-up message sera affiché. </i></p>
             </li>
             <li><p class="mb-0"><i>Continuer votre création du profil, le film précédemment ajouté apparaîtra au fur et à mesure dans cette page.  </i></p>
             </li>
@@ -33,13 +33,15 @@
 <div>
     <form action="/movie_rec"  method="post" id="search_form">
     {%  csrf_token  %}
-        <div class="input-group mb-3" style="width: 65%; margin:0 auto;">
-            <input id="input_movie" name="movie_title" type="text" class="form-control typeahead tt-query" placeholder="Recherche à partir du titre (en anglais ou en français)" autocomplete="off" spellcheck="false">
-                <span class="input-group-btn">
-                    <button id="search_btn" type="submit" class="btn btn-outline-secondary">
-                        <i class="fa fa-search"></i>
-                    </button>
-                </span>
+        <div class="input-group" style="width: 65%; margin:0 auto;">
+            <div style="width: 90%; margin:0 auto;">
+                <input id="input_movie" name="movie_title" type="search" class="form-control typeahead tt-query" placeholder="Recherche à partir du titre (en anglais ou en français)" autocomplete="off" spellcheck="false"/>
+            </div>
+<!--                <span class="input-group-btn">-->
+            <button id="search_btn" type="submit" class="btn btn-primary" style="width: 10%; margin:0 auto;">
+                <i class="fa fa-search"></i>
+            </button>
+<!--                </span>-->
         </div>
     </form>
 
@@ -90,6 +92,7 @@
     <br>
     <br>
     <br>
+    <hr class="mt-0 mb-4" style="width: 65%; margin:0 auto;">
     {% if movie_infos %}
         <div style="width: 65%; margin:0 auto;">
 <!--            <h4 class="mb-2 text-info">Films ajoutés</h4>-->

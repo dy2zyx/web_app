@@ -470,7 +470,7 @@
 
 
 <div style="max-width: 100%; margin: 0 auto;" class="text-center center-block">
-    <button type="submit" id="feedback_exp_top1" onclick="myFunc()" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Valider l'évaluation </button>
+    <button type="submit" id="feedback_exp_top1" class="btn btn-success" style="max-width: 100%; margin: 0 auto;"><i class="fa fa-check fa-lg"></i> Valider l'évaluation </button>
 </div>
 <br>
 
@@ -486,13 +486,6 @@
 {{ block.super }}
 <script src="{% static 'recsys_demo/js/movie_exp_top1.js' %}"></script>
 <script>
-function myFunc(){
-  var x = document.getElementById("feedback_exp_top1_done");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } else {
-    x.style.display = "none";
-  }
-}
+
 </script>
 {% endblock javascript %}
